@@ -220,5 +220,5 @@ export async function POST(
     .eq("id", id);
 
   console.log("[analyze debug] done (questioning path)");
-  return NextResponse.json({ status: "questioning" });
+  return NextResponse.json({ status: "questioning", question: decision.content });
 }

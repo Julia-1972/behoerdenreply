@@ -64,7 +64,19 @@ export default function CaseClient({
           return;
         }
 
-        router.refresh();
+        const data = await res.json();
+
+        if (data.status === "questioning" && data.question) {
+          setMessages([{
+            id: `local-q-${Date.now()}`,
+            role: "ai_question",
+            content: data.question,
+            created_at: new Date().toISOString(),
+          }]);
+          setStatus("questioning");
+        } else {
+          router.refresh();
+        }
       })
       .catch(() => {});
   }, [initialStatus, caseId, router]);
