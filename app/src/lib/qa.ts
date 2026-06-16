@@ -37,9 +37,14 @@ export async function getNextQaStep(
 ): Promise<QaDecision> {
   const systemPrompt = lang === "ru" ? SYSTEM_PROMPT_RU : SYSTEM_PROMPT_DE;
 
+  const summaryLabel =
+    lang === "ru"
+      ? "Краткое содержание официального письма (переведено для контекста):"
+      : "Zusammenfassung des Schreibens:";
+
   const messages: { role: "system" | "user" | "assistant"; content: string }[] = [
     { role: "system", content: systemPrompt },
-    { role: "user", content: `Zusammenfassung des Schreibens:\n${analysisSummary}` },
+    { role: "user", content: `${summaryLabel}\n${analysisSummary}` },
   ];
 
   for (const m of history) {
