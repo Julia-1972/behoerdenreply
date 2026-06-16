@@ -99,10 +99,30 @@ export async function POST(
       .update({ status: "done", completed_at: new Date().toISOString() })
       .eq("id", id);
 
-    await createSupabaseAdminClient()
+    const admin = createSupabaseAdminClient();
+    await admin.from("profiles").update({ free_used: true }).eq("id", user.id);
+
+    const { data: prof } = await admin
       .from("profiles")
-      .update({ free_used: true })
-      .eq("id", user.id);
+      .select("plan, subscription_documents_used, subscription_period_start")
+      .eq("id", user.id)
+      .single();
+
+    if (prof?.plan === "subscription") {
+      const now = new Date();
+      const periodStart = prof.subscription_period_start
+        ? new Date(prof.subscription_period_start)
+        : null;
+      const sameMonth =
+        periodStart &&
+        periodStart.getFullYear() === now.getFullYear() &&
+        periodStart.getMonth() === now.getMonth();
+      const newCount = sameMonth ? (prof.subscription_documents_used ?? 0) + 1 : 1;
+      await admin
+        .from("profiles")
+        .update({ subscription_documents_used: newCount })
+        .eq("id", user.id);
+    }
 
     const { pdfUrl, docxUrl } = await getResultSignedUrls(
       supabase,

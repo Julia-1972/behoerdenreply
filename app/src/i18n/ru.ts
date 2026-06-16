@@ -31,7 +31,8 @@ export const ru = {
   upgradePerDoc: "3,99 € за документ",
   upgradePerDocHint: "Разовая оплата за каждый документ",
   upgradeSubscription: "9,99 € в месяц",
-  upgradeSubscriptionHint: "Безлимитные документы",
+  upgradeSubscriptionHint: "До 30 документов в месяц",
+  upgradeSubscriptionLimitReached: "Лимит подписки исчерпан (30 документов в месяц). Следующий период начнётся в следующем месяце.",
   upgradeProcessing: "Активация...",
   upgradeSuccess: "Тариф активирован",
 

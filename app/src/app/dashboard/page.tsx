@@ -18,7 +18,7 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("language, plan, free_used")
+    .select("language, plan, free_used, subscription_active, subscription_documents_used, subscription_period_start")
     .eq("id", user.id)
     .single();
 
@@ -48,6 +48,21 @@ export default async function DashboardPage() {
         </div>
       ) : profile?.free_used && profile.plan === "free" ? (
         <UpgradeScreen lang={lang} t={t} />
+      ) : profile?.plan === "subscription" && profile.subscription_active && (() => {
+        const periodStart = profile.subscription_period_start
+          ? new Date(profile.subscription_period_start)
+          : null;
+        const now = new Date();
+        const sameMonth =
+          periodStart &&
+          periodStart.getFullYear() === now.getFullYear() &&
+          periodStart.getMonth() === now.getMonth();
+        const docsUsed = sameMonth ? (profile.subscription_documents_used ?? 0) : 0;
+        return docsUsed >= 30;
+      })() ? (
+        <div className="flex w-full max-w-sm flex-col items-center gap-4 text-center">
+          <p className="text-sm text-gray-600">{t.upgradeSubscriptionLimitReached}</p>
+        </div>
       ) : (
         <UploadForm lang={lang} />
       )}

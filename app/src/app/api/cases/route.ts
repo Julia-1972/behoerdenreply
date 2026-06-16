@@ -17,12 +17,29 @@ export async function POST(request: Request) {
   // Free/paid gate
   const { data: profile } = await supabase
     .from("profiles")
-    .select("plan, free_used, subscription_active")
+    .select("plan, free_used, subscription_active, subscription_documents_used, subscription_period_start")
     .eq("id", user.id)
     .single();
 
   if (profile?.free_used && profile.plan === "free") {
     return NextResponse.json({ error: "upgrade_required" }, { status: 402 });
+  }
+
+  if (profile?.plan === "subscription" && profile.subscription_active) {
+    const periodStart = profile.subscription_period_start
+      ? new Date(profile.subscription_period_start)
+      : null;
+    const now = new Date();
+    const sameMonth =
+      periodStart &&
+      periodStart.getFullYear() === now.getFullYear() &&
+      periodStart.getMonth() === now.getMonth();
+
+    const docsUsed = sameMonth ? (profile.subscription_documents_used ?? 0) : 0;
+
+    if (docsUsed >= 30) {
+      return NextResponse.json({ error: "subscription_limit_reached" }, { status: 402 });
+    }
   }
 
   // MVP Rule: only 1 active case at a time.

@@ -31,7 +31,8 @@ export const de = {
   upgradePerDoc: "3,99 € pro Dokument",
   upgradePerDocHint: "Einmalige Zahlung pro Dokument",
   upgradeSubscription: "9,99 € pro Monat",
-  upgradeSubscriptionHint: "Unbegrenzte Dokumente",
+  upgradeSubscriptionHint: "Bis zu 30 Dokumente pro Monat",
+  upgradeSubscriptionLimitReached: "Monatslimit der Abonnement erreicht (30 Dokumente). Der nächste Zeitraum beginnt im nächsten Monat.",
   upgradeProcessing: "Wird aktiviert...",
   upgradeSuccess: "Tarif aktiviert",
 
