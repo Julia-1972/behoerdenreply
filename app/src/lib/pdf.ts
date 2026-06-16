@@ -1,19 +1,7 @@
-import path from "path";
-import { PDFParse } from "pdf-parse";
-
-const workerSrc = path.join(
-  process.cwd(),
-  "node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs"
-);
-
-PDFParse.setWorker(`file://${workerSrc.replace(/\\/g, "/")}`);
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const pdfParse = require("pdf-parse/lib/pdf-parse.js");
 
 export async function extractPdfText(buffer: Buffer): Promise<string> {
-  const parser = new PDFParse({ data: buffer });
-  try {
-    const result = await parser.getText();
-    return result.text.trim();
-  } finally {
-    await parser.destroy();
-  }
+  const result = await pdfParse(buffer);
+  return result.text.trim();
 }
