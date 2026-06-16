@@ -3,6 +3,8 @@ import { createSupabaseServerClient, createSupabaseAdminClient } from "@/lib/sup
 import { getNextQaStep } from "@/lib/qa";
 import { uploadResultFiles, getResultSignedUrls } from "@/lib/result-files";
 
+export const maxDuration = 60;
+
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }

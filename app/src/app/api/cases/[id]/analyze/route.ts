@@ -5,6 +5,8 @@ import { openai, AI_MODEL } from "@/lib/openai";
 import { getNextQaStep } from "@/lib/qa";
 import { uploadResultFiles } from "@/lib/result-files";
 
+export const maxDuration = 60;
+
 const MIN_TEXT_LENGTH = 50;
 
 const ANALYSIS_SYSTEM_PROMPT = `Du bist ein Assistent, der amtliche Schreiben aus Deutschland analysiert.
@@ -93,8 +95,12 @@ export async function POST(
   }
 
   console.log("[analyze debug] -> proceeding to AI analysis");
+  console.log("[analyze debug] openai client ready:", !!openai);
+  console.log("[analyze debug] model:", AI_MODEL);
+  console.log("[analyze debug] text chars to send:", Math.min(text.length, 12000));
 
   let analysisSummary: string;
+  console.log("[analyze debug] calling openai.chat.completions.create ...");
   try {
     const completion = await openai.chat.completions.create({
       model: AI_MODEL,
@@ -103,8 +109,10 @@ export async function POST(
         { role: "user", content: text.slice(0, 12000) },
       ],
     });
+    console.log("[analyze debug] openai call returned, choices:", completion.choices?.length);
 
     analysisSummary = completion.choices[0]?.message?.content ?? "";
+    console.log("[analyze debug] analysisSummary length:", analysisSummary.length);
   } catch (err) {
     console.error("[analyze] OpenAI error", err);
 
@@ -116,10 +124,12 @@ export async function POST(
     return NextResponse.json({ error: "ai_error" }, { status: 502 });
   }
 
+  console.log("[analyze debug] saving analysis_summary to DB ...");
   await supabase
     .from("cases")
     .update({ analysis_summary: analysisSummary })
     .eq("id", id);
+  console.log("[analyze debug] analysis_summary saved");
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -128,10 +138,13 @@ export async function POST(
     .single();
 
   const lang = profile?.language === "de" ? "de" : "ru";
+  console.log("[analyze debug] lang:", lang);
 
   let decision;
+  console.log("[analyze debug] calling getNextQaStep ...");
   try {
     decision = await getNextQaStep(analysisSummary, [], lang);
+    console.log("[analyze debug] getNextQaStep action:", decision.action);
   } catch (err) {
     console.error("[analyze] QA decision error", err);
 
@@ -144,12 +157,14 @@ export async function POST(
   }
 
   if (decision.action === "final") {
+    console.log("[analyze debug] action=final, uploading result files ...");
     const { pdfPath, docxPath } = await uploadResultFiles(
       supabase,
       user.id,
       id,
       decision.content
     );
+    console.log("[analyze debug] files uploaded:", pdfPath, docxPath);
 
     await supabase.from("case_results").insert({
       case_id: id,
@@ -168,9 +183,11 @@ export async function POST(
       .update({ free_used: true })
       .eq("id", user.id);
 
+    console.log("[analyze debug] done (final path)");
     return NextResponse.json({ status: "done" });
   }
 
+  console.log("[analyze debug] action=question, inserting ai_question message ...");
   await supabase.from("case_messages").insert({
     case_id: id,
     role: "ai_question",
@@ -182,5 +199,6 @@ export async function POST(
     .update({ status: "questioning" })
     .eq("id", id);
 
+  console.log("[analyze debug] done (questioning path)");
   return NextResponse.json({ status: "questioning" });
 }
