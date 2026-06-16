@@ -33,6 +33,11 @@ export default function LoginPage() {
         setLoading(false);
         return;
       }
+      await fetch("/api/profile/language", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lang }),
+      });
     } else {
       const { data, error } = await supabase.auth.signUp({
         email,
