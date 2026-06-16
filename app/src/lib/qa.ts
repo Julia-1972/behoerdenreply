@@ -6,7 +6,7 @@ export type QaDecision =
 
 const SYSTEM_PROMPT_RU = `Ты помощник, который помогает пользователям отвечать на официальные письма из немецких государственных органов.
 
-Ты получишь внутреннюю сводку официального письма и историю вопросов и ответов с пользователем.
+Ты получишь краткое содержание официального письма на русском языке и историю вопросов и ответов с пользователем.
 
 Твоя задача:
 - Если для составления полного и корректного ответа в ведомство ещё не хватает важной информации — задай пользователю РОВНО ОДИН чёткий и простой вопрос.
@@ -30,6 +30,20 @@ WICHTIG: Fragen an den Nutzer NUR AUF DEUTSCH. Kein Russisch in den Fragen. Das 
 Antworte ausschließlich als JSON: {"action": "question", "content": "..."} oder {"action": "final", "content": "..."}.
 Stelle nur EINE Frage zur Zeit. Frage nur nach Informationen, die wirklich fehlen und für die Antwort nötig sind.`;
 
+async function translateSummaryToRussian(summary: string): Promise<string> {
+  const completion = await openai.chat.completions.create({
+    model: AI_MODEL,
+    messages: [
+      {
+        role: "system",
+        content: "Переведи следующий текст с немецкого на русский язык. Переводи точно, сохраняя все детали. Верни только перевод, без пояснений.",
+      },
+      { role: "user", content: summary },
+    ],
+  });
+  return completion.choices[0]?.message?.content ?? summary;
+}
+
 export async function getNextQaStep(
   analysisSummary: string,
   history: { role: "ai_question" | "user_answer"; content: string }[],
@@ -37,14 +51,27 @@ export async function getNextQaStep(
 ): Promise<QaDecision> {
   const systemPrompt = lang === "ru" ? SYSTEM_PROMPT_RU : SYSTEM_PROMPT_DE;
 
+  const contextSummary =
+    lang === "ru"
+      ? await translateSummaryToRussian(analysisSummary)
+      : analysisSummary;
+
   const summaryLabel =
     lang === "ru"
-      ? "Краткое содержание официального письма (переведено для контекста):"
+      ? "Краткое содержание официального письма:"
       : "Zusammenfassung des Schreibens:";
+
+  const languageInstruction =
+    lang === "ru"
+      ? "\n\nТвой ответ должен быть только на русском языке."
+      : "";
 
   const messages: { role: "system" | "user" | "assistant"; content: string }[] = [
     { role: "system", content: systemPrompt },
-    { role: "user", content: `${summaryLabel}\n${analysisSummary}` },
+    {
+      role: "user",
+      content: `${summaryLabel}\n${contextSummary}${languageInstruction}`,
+    },
   ];
 
   for (const m of history) {
