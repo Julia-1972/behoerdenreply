@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient, createSupabaseAdminClient } from "@/lib/supabase-server";
-import { getNextQaStep } from "@/lib/qa";
 import { uploadResultFiles, getResultSignedUrls } from "@/lib/result-files";
 import { prependBriefkopf } from "@/lib/briefkopf";
+import { createAssistant, addUserMessage, runAndGetResponse, extractFinalLetter } from "@/lib/assistant";
 
 export const maxDuration = 60;
 
@@ -13,24 +13,16 @@ export async function POST(
   const { id } = await params;
   const supabase = await createSupabaseServerClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
   const body = await request.json().catch(() => null);
   const answer = typeof body?.answer === "string" ? body.answer.trim() : "";
-
-  if (!answer) {
-    return NextResponse.json({ error: "empty_answer" }, { status: 400 });
-  }
+  if (!answer) return NextResponse.json({ error: "empty_answer" }, { status: 400 });
 
   const { data: caseData } = await supabase
     .from("cases")
-    .select("id, user_id, status, analysis_summary")
+    .select("id, user_id, status, analysis_summary, thread_id")
     .eq("id", id)
     .single();
 
@@ -38,59 +30,37 @@ export async function POST(
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
 
-  if (caseData.status !== "questioning" || !caseData.analysis_summary) {
+  if (caseData.status !== "questioning" || !caseData.thread_id) {
     return NextResponse.json({ status: caseData.status });
   }
 
+  // Save user answer to DB
   await supabase.from("case_messages").insert({
     case_id: id,
     role: "user_answer",
     content: answer,
   });
 
-  const { data: messages } = await supabase
-    .from("case_messages")
-    .select("role, content")
-    .eq("case_id", id)
-    .order("created_at", { ascending: true });
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("language")
-    .eq("id", user.id)
-    .single();
-
-  const lang = profile?.language === "de" ? "de" : "ru";
-
-  let decision;
+  // Add answer to thread and get AI response
+  let response: string;
   try {
-    decision = await getNextQaStep(
-      caseData.analysis_summary,
-      messages ?? [],
-      lang
-    );
+    const assistantId = await createAssistant();
+    await addUserMessage(caseData.thread_id, answer);
+    response = await runAndGetResponse(caseData.thread_id, assistantId);
   } catch (err) {
-    console.error("[answer] QA decision error", err);
-
-    await supabase
-      .from("cases")
-      .update({ status: "cancelled", error_reason: "ai_error" })
-      .eq("id", id);
-
+    console.error("[answer] Assistant error", err);
+    await supabase.from("cases").update({ status: "cancelled", error_reason: "ai_error" }).eq("id", id);
     return NextResponse.json({ error: "ai_error" }, { status: 502 });
   }
 
-  if (decision.action === "final") {
+  // Check for final letter
+  const finalLetter = extractFinalLetter(response);
+
+  if (finalLetter) {
     const today = new Date().toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
-    const finalText = lang === "de"
-      ? prependBriefkopf(decision.content, caseData.analysis_summary, today)
-      : decision.content;
-    const { pdfPath, docxPath } = await uploadResultFiles(
-      supabase,
-      user.id,
-      id,
-      finalText
-    );
+    const finalText = prependBriefkopf(finalLetter, caseData.analysis_summary, today);
+
+    const { pdfPath, docxPath } = await uploadResultFiles(supabase, user.id, id, finalText);
 
     await supabase.from("case_results").insert({
       case_id: id,
@@ -99,10 +69,7 @@ export async function POST(
       docx_path: docxPath,
     });
 
-    await supabase
-      .from("cases")
-      .update({ status: "done", completed_at: new Date().toISOString() })
-      .eq("id", id);
+    await supabase.from("cases").update({ status: "done", completed_at: new Date().toISOString() }).eq("id", id);
 
     const admin = createSupabaseAdminClient();
     await admin.from("profiles").update({ free_used: true }).eq("id", user.id);
@@ -115,25 +82,15 @@ export async function POST(
 
     if (prof?.plan === "subscription") {
       const now = new Date();
-      const periodStart = prof.subscription_period_start
-        ? new Date(prof.subscription_period_start)
-        : null;
-      const sameMonth =
-        periodStart &&
+      const periodStart = prof.subscription_period_start ? new Date(prof.subscription_period_start) : null;
+      const sameMonth = periodStart &&
         periodStart.getFullYear() === now.getFullYear() &&
         periodStart.getMonth() === now.getMonth();
       const newCount = sameMonth ? (prof.subscription_documents_used ?? 0) + 1 : 1;
-      await admin
-        .from("profiles")
-        .update({ subscription_documents_used: newCount })
-        .eq("id", user.id);
+      await admin.from("profiles").update({ subscription_documents_used: newCount }).eq("id", user.id);
     }
 
-    const { pdfUrl, docxUrl } = await getResultSignedUrls(
-      supabase,
-      pdfPath,
-      docxPath
-    );
+    const { pdfUrl, docxUrl } = await getResultSignedUrls(supabase, pdfPath, docxPath);
 
     return NextResponse.json({
       status: "done",
@@ -143,11 +100,12 @@ export async function POST(
     });
   }
 
+  // Still asking questions
   await supabase.from("case_messages").insert({
     case_id: id,
     role: "ai_question",
-    content: decision.content,
+    content: response,
   });
 
-  return NextResponse.json({ status: "questioning", question: decision.content });
+  return NextResponse.json({ status: "questioning", question: response });
 }
