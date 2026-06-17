@@ -32,7 +32,7 @@ export function extractBriefkopfFromText(pdfText: string): BriefkopfData {
   let behördeName = "";
   for (const pat of behördePatterns) {
     const m = pdfText.match(pat);
-    if (m) { behördeName = m[0].replace(/\s+/g, " ").trim(); break; }
+    if (m) { behördeName = m[0].split(/\n/)[0].replace(/\s+/g, " ").trim(); break; }
   }
 
   // Behörde address: "Behörde..., PLZ Stadt" or line after behörde name
@@ -126,7 +126,11 @@ export function parseBriefkopf(analysisSummary: string): BriefkopfData | null {
 }
 
 export function buildDin5008Header(data: BriefkopfData, date: string): string {
-  const ort = data.nutzerAdresse.split(",")[1]?.trim() ?? data.nutzerAdresse;
+  const parts = data.nutzerAdresse.split(",").map(s => s.trim());
+  const street = parts[0] ?? "";
+  const cityLine = parts[1] ?? "";
+  const ort = cityLine.replace(/^\d{5}\s+/, "") || cityLine;
+
   const aktenzeichen =
     data.aktenzeichen && data.aktenzeichen.toLowerCase() !== "keines"
       ? `Ihr Zeichen: ${data.aktenzeichen}\n\n`
@@ -134,7 +138,8 @@ export function buildDin5008Header(data: BriefkopfData, date: string): string {
 
   return [
     data.nutzerName,
-    data.nutzerAdresse,
+    street,
+    cityLine,
     "",
     data.behördeName,
     data.behördeAdresse,
