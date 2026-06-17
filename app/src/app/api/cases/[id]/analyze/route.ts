@@ -4,6 +4,7 @@ import { extractPdfText } from "@/lib/pdf";
 import { openai, AI_MODEL } from "@/lib/openai";
 import { getNextQaStep } from "@/lib/qa";
 import { uploadResultFiles } from "@/lib/result-files";
+import { prependBriefkopf } from "@/lib/briefkopf";
 
 export const maxDuration = 60;
 
@@ -168,17 +169,21 @@ export async function POST(
 
   if (decision.action === "final") {
     console.log("[analyze debug] action=final, uploading result files ...");
+    const today = new Date().toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
+    const finalText = lang === "de"
+      ? prependBriefkopf(decision.content, analysisSummary, today)
+      : decision.content;
     const { pdfPath, docxPath } = await uploadResultFiles(
       supabase,
       user.id,
       id,
-      decision.content
+      finalText
     );
     console.log("[analyze debug] files uploaded:", pdfPath, docxPath);
 
     await supabase.from("case_results").insert({
       case_id: id,
-      final_text: decision.content,
+      final_text: finalText,
       pdf_path: pdfPath,
       docx_path: docxPath,
     });

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createSupabaseServerClient, createSupabaseAdminClient } from "@/lib/supabase-server";
 import { getNextQaStep } from "@/lib/qa";
 import { uploadResultFiles, getResultSignedUrls } from "@/lib/result-files";
+import { prependBriefkopf } from "@/lib/briefkopf";
 
 export const maxDuration = 60;
 
@@ -80,16 +81,20 @@ export async function POST(
   }
 
   if (decision.action === "final") {
+    const today = new Date().toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
+    const finalText = lang === "de"
+      ? prependBriefkopf(decision.content, caseData.analysis_summary, today)
+      : decision.content;
     const { pdfPath, docxPath } = await uploadResultFiles(
       supabase,
       user.id,
       id,
-      decision.content
+      finalText
     );
 
     await supabase.from("case_results").insert({
       case_id: id,
-      final_text: decision.content,
+      final_text: finalText,
       pdf_path: pdfPath,
       docx_path: docxPath,
     });
@@ -132,7 +137,7 @@ export async function POST(
 
     return NextResponse.json({
       status: "done",
-      final_text: decision.content,
+      final_text: finalText,
       pdf_url: pdfUrl,
       docx_url: docxUrl,
     });
