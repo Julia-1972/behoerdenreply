@@ -26,6 +26,7 @@ const SYSTEM_PROMPT_RU = `Ты помощник, который помогает
 
 Правила принятия решения:
 - АБСОЛЮТНЫЙ ЗАПРЕТ: если последний ответ пользователя — это только "да", "нет", "не знаю", "не помню", "может быть", "наверное", "возможно" или любой другой короткий ответ без конкретных данных — ты ОБЯЗАН задать уточняющий вопрос и запросить конкретику. Переход к финальному письму в этом случае ЗАПРЕЩЁН.
+- Если пользователь ответил "нет" на вопрос с конкретными данными (например, "правильна ли эта дата?") — НЕ задавай тот же вопрос снова. Спроси о правильных данных: "Когда именно началась деятельность?" или "Какая правильная дата?". Никогда не повторяй один и тот же вопрос.
 - Генерируй финальный ответ ТОЛЬКО если ответы пользователя содержат конкретные факты: даты, суммы, названия, имена, конкретные действия — не просто подтверждения.
 - Если хотя бы один важный пункт из чеклиста выше неизвестен или известен только как "да/нет" — задай уточняющий вопрос с запросом конкретных данных.
 
@@ -61,6 +62,7 @@ Die nächste Frage stellst du erst nach der Antwort des Nutzers auf die aktuelle
 
 Entscheidungsregeln:
 - ABSOLUTES VERBOT: Wenn die letzte Nutzerantwort nur aus "ja", "nein", "weiß nicht", "keine Ahnung", "vielleicht", "könnte sein" oder einer anderen kurzen Antwort ohne konkrete Daten besteht — musst du ZWINGEND eine Rückfrage stellen und konkrete Angaben verlangen. Der Übergang zum finalen Schreiben ist in diesem Fall VERBOTEN.
+- Wenn der Nutzer "nein" auf eine Frage mit konkreten Daten antwortet (z.B. "Stimmt das Datum?") — frage NICHT erneut dasselbe. Frage stattdessen nach den richtigen Daten: "Was ist dann das korrekte Datum?" oder "Wann genau hat die Tätigkeit begonnen?". Wiederhole niemals dieselbe Frage.
 - Erstelle das finale Antwortschreiben NUR, wenn die Antworten des Nutzers konkrete Fakten enthalten: Daten, Beträge, Namen, Bezeichnungen, konkrete Handlungen — nicht nur Bestätigungen.
 - Fehlt mindestens ein wichtiger Punkt aus der Checkliste oder ist er nur mit "ja/nein" beantwortet — stelle eine Rückfrage mit der Bitte um konkrete Angaben.
 
