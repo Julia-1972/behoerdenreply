@@ -7,26 +7,41 @@ export interface BriefkopfData {
 }
 
 export function parseBriefkopf(analysisSummary: string): BriefkopfData | null {
-  const match = analysisSummary.match(/---\s*BRIEFKOPF\s*---([\s\S]*?)---\s*ENDE\s*---/i);
-  console.log("[briefkopf] block found:", !!match, "summary length:", analysisSummary.length);
-  if (!match) {
-    console.log("[briefkopf] summary tail:", analysisSummary.slice(-500));
-    return null;
+  // Try new JSON format: BRIEFKOPF_JSON:{...}
+  const jsonMatch = analysisSummary.match(/BRIEFKOPF_JSON:\s*(\{[^\n]+\})/);
+  if (jsonMatch) {
+    try {
+      const parsed = JSON.parse(jsonMatch[1]);
+      console.log("[briefkopf] JSON parsed:", JSON.stringify(parsed));
+      return {
+        nutzerName: parsed.nutzerName ?? "",
+        nutzerAdresse: parsed.nutzerAdresse ?? "",
+        behördeName: parsed.behördeName ?? "",
+        behördeAdresse: parsed.behördeAdresse ?? "",
+        aktenzeichen: parsed.aktenzeichen ?? "",
+      };
+    } catch {
+      console.log("[briefkopf] JSON parse failed:", jsonMatch[1]);
+    }
   }
 
-  const block = match[1];
-  const get = (key: string) =>
-    (block.match(new RegExp(`${key}\\s*:\\s*(.+)`)) ?? [])[1]?.trim() ?? "";
+  // Fallback: old ---BRIEFKOPF--- block format
+  const blockMatch = analysisSummary.match(/---\s*BRIEFKOPF\s*---([\s\S]*?)---\s*ENDE\s*---/i);
+  if (blockMatch) {
+    const block = blockMatch[1];
+    const get = (key: string) =>
+      (block.match(new RegExp(`${key}\\s*:\\s*(.+)`)) ?? [])[1]?.trim() ?? "";
+    return {
+      nutzerName: get("NUTZER_NAME"),
+      nutzerAdresse: get("NUTZER_ADRESSE"),
+      behördeName: get("BEHOERDE_NAME"),
+      behördeAdresse: get("BEHOERDE_ADRESSE"),
+      aktenzeichen: get("AKTENZEICHEN"),
+    };
+  }
 
-  const data: BriefkopfData = {
-    nutzerName: get("NUTZER_NAME"),
-    nutzerAdresse: get("NUTZER_ADRESSE"),
-    behördeName: get("BEHOERDE_NAME"),
-    behördeAdresse: get("BEHOERDE_ADRESSE"),
-    aktenzeichen: get("AKTENZEICHEN"),
-  };
-  console.log("[briefkopf] parsed:", JSON.stringify(data));
-  return data;
+  console.log("[briefkopf] no block found. Summary tail:", analysisSummary.slice(-400));
+  return null;
 }
 
 export function buildDin5008Header(data: BriefkopfData, date: string): string {
