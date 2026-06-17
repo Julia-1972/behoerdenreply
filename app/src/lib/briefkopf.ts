@@ -10,42 +10,61 @@ export interface BriefkopfData {
 export function extractBriefkopfFromText(pdfText: string): BriefkopfData {
   const lines = pdfText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
 
-  // Aktenzeichen patterns
-  const azMatch = pdfText.match(/(?:Mein Zeichen|Ihr Zeichen|Kundennummer|Geschäftszeichen)[:\s]+([A-Z0-9\/\-\.]+)/i);
-  const aktenzeichen = azMatch?.[1]?.trim() ?? "";
+  // Aktenzeichen: find "Mein Zeichen" / "Kundennummer" then scan next lines for the code
+  let aktenzeichen = "";
+  const azIdx = pdfText.search(/(?:Mein Zeichen|Ihr Zeichen|Kundennummer|Geschäftszeichen)/i);
+  if (azIdx !== -1) {
+    const azContext = pdfText.slice(azIdx, azIdx + 300);
+    const azLines = azContext.split(/\r?\n/).map(l => l.trim());
+    for (const azLine of azLines) {
+      const m = azLine.match(/^([A-Z0-9][A-Z0-9\/\-]{3,})$/);
+      if (m) { aktenzeichen = m[1]; break; }
+    }
+  }
 
-  // Behörde: first meaningful institution line (usually top of letter)
+  // Behörde name: find institution name
   const behördePatterns = [
-    /Agentur für Arbeit\s+[\w\s\.]+/i,
-    /Jobcenter\s+[\w\s\.]+/i,
-    /Finanzamt\s+[\w\s\.]+/i,
-    /Bundesagentur für Arbeit/i,
-    /(?:Amt|Behörde|Ministerium|Verwaltung)\s+\w+/i,
+    /Agentur für Arbeit\s+[A-ZÄÖÜa-zäöüß\s\.]+/,
+    /Jobcenter\s+[A-ZÄÖÜa-zäöüß\s\.]+/,
+    /Finanzamt\s+[A-ZÄÖÜa-zäöüß\s\.]+/,
+    /Bundesagentur für Arbeit/,
   ];
   let behördeName = "";
   for (const pat of behördePatterns) {
     const m = pdfText.match(pat);
-    if (m) { behördeName = m[0].trim(); break; }
+    if (m) { behördeName = m[0].replace(/\s+/g, " ").trim(); break; }
   }
 
-  // Behörde address: look for PLZ + city after behörde name
-  const behördeAdresseMatch = pdfText.match(/(\d{5}\s+[\wäöüÄÖÜß\s]+?)(?:\n|Postanschrift|Internet|Bankverbindung)/);
+  // Behörde address: "Behörde..., PLZ Stadt" or line after behörde name
+  const behördeAdresseMatch = pdfText.match(/Agentur für Arbeit[^\n,]+,\s*(\d{5}\s+\w+)/i);
   const behördeAdresse = behördeAdresseMatch?.[1]?.trim() ?? "";
 
-  // Nutzer: find name+address block (name + Straße + PLZ)
-  // Pattern: line with "Vorname Nachname" followed by "Straße Nr" and "PLZ Ort"
+  // Nutzer name + address: name line followed (within 6 lines) by street + PLZ
   let nutzerName = "";
   let nutzerAdresse = "";
-  for (let i = 0; i < lines.length - 2; i++) {
+  for (let i = 0; i < lines.length - 5; i++) {
     const line = lines[i];
-    const next = lines[i + 1];
-    const next2 = lines[i + 2];
-    // Name line: 2-3 words, no digits, no special chars
-    if (/^[A-ZÄÖÜ][a-zäöüß]+ [A-ZÄÖÜ][a-zäöüß]+/.test(line) &&
-        /\d/.test(next) && // street has number
-        /^\d{5}/.test(next2)) { // PLZ
+    // Name: 2 words, both starting uppercase, no digits
+    if (!/^[A-ZÄÖÜ][a-zäöüß]+ [A-ZÄÖÜ][a-zäöüß]+$/.test(line)) continue;
+
+    // Look for street within next 3 lines, PLZ within next 6 lines
+    let street = "";
+    let plzLine = "";
+    for (let j = i + 1; j <= Math.min(i + 6, lines.length - 1); j++) {
+      if (!street && /\d/.test(lines[j]) && /str\.|straße|weg|platz|gasse|allee|ring/i.test(lines[j])) {
+        street = lines[j];
+      }
+      if (!street && /\b\d+[a-z]?\b/.test(lines[j]) && lines[j].length < 30) {
+        // Might be street with number but without keyword
+        if (j === i + 1) street = lines[j];
+      }
+      if (!plzLine && /^\d{5}\s+\w/.test(lines[j])) {
+        plzLine = lines[j];
+      }
+    }
+    if (street && plzLine) {
       nutzerName = line;
-      nutzerAdresse = `${next}, ${next2}`;
+      nutzerAdresse = `${street}, ${plzLine}`;
       break;
     }
   }
