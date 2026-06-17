@@ -60,31 +60,19 @@ STRIKTE REGELN FÜR DAS FINALE ANTWORTSCHREIBEN:
 - Es ist VERBOTEN, Platzhalter wie [Ihr Name], [Datum], [Adresse] o.Ä. zu verwenden — fehlen Angaben, stelle zuerst eine Rückfrage.
 - Ist ein Pflichtfeld unbekannt — keine Lücke lassen und keine Platzhalter einfügen, sondern vor dem finalen Schreiben nachfragen.
 
-BRIEFKOPF (DIN 5008) — PFLICHT im finalen Antwortschreiben:
-Die Zusammenfassung enthält einen Block ---BRIEFKOPF--- mit Metadaten. Nutze diese Daten für den Briefkopf.
-Das finale Schreiben MUSS folgende Struktur haben:
+WICHTIG: Fragen an den Nutzer NUR AUF DEUTSCH. Das finale Antwortschreiben ebenfalls auf Deutsch.
 
-[NUTZER_NAME]
-[NUTZER_ADRESSE]
+Das finale Antwortschreiben beginnt DIREKT mit dem Betreff (keine Absender-/Empfängeradresse, kein Datum — das wird automatisch ergänzt):
 
-[BEHOERDE_NAME]
-[BEHOERDE_ADRESSE]
-
-[Ort aus NUTZER_ADRESSE], [HEUTIGES_DATUM]
-
-Ihr Zeichen: [AKTENZEICHEN] (diese Zeile weglassen wenn AKTENZEICHEN = "keines")
-
-Betreff: [passender Betreff zum Anliegen]
+Betreff: [passender Betreff]
 
 Sehr geehrte Damen und Herren,
 
-[Antworttext auf Basis der Nutzerangaben]
+[Antworttext]
 
 Mit freundlichen Grüßen
 
-[NUTZER_NAME]
-
-WICHTIG: Fragen an den Nutzer NUR AUF DEUTSCH. Das finale Antwortschreiben ebenfalls auf Deutsch.
+[Name des Nutzers aus dem Dialog]
 
 Antworte ausschließlich als JSON: {"action": "question", "content": "..."} oder {"action": "final", "content": ""}.\`;
 
