@@ -7,21 +7,36 @@ export interface BriefkopfData {
 }
 
 export function parseBriefkopf(analysisSummary: string): BriefkopfData | null {
-  // Try new JSON format: BRIEFKOPF_JSON:{...}
-  const jsonMatch = analysisSummary.match(/BRIEFKOPF_JSON:\s*(\{[^\n]+\})/);
-  if (jsonMatch) {
+  // Try JSON format: BRIEFKOPF_JSON:{...} (may be multiline)
+  const jsonIdx = analysisSummary.indexOf("BRIEFKOPF_JSON:");
+  if (jsonIdx !== -1) {
+    const jsonStr = analysisSummary.slice(jsonIdx + "BRIEFKOPF_JSON:".length).trim();
     try {
-      const parsed = JSON.parse(jsonMatch[1]);
+      const parsed = JSON.parse(jsonStr);
       console.log("[briefkopf] JSON parsed:", JSON.stringify(parsed));
       return {
         nutzerName: parsed.nutzerName ?? "",
         nutzerAdresse: parsed.nutzerAdresse ?? "",
-        behördeName: parsed.behördeName ?? "",
-        behördeAdresse: parsed.behördeAdresse ?? "",
+        behördeName: parsed.behördeName ?? parsed["behördeName"] ?? "",
+        behördeAdresse: parsed.behördeAdresse ?? parsed["behördeAdresse"] ?? "",
         aktenzeichen: parsed.aktenzeichen ?? "",
       };
     } catch {
-      console.log("[briefkopf] JSON parse failed:", jsonMatch[1]);
+      // JSON might have trailing text — try to extract just the object
+      const objEnd = jsonStr.lastIndexOf("}");
+      if (objEnd !== -1) {
+        try {
+          const parsed = JSON.parse(jsonStr.slice(0, objEnd + 1));
+          return {
+            nutzerName: parsed.nutzerName ?? "",
+            nutzerAdresse: parsed.nutzerAdresse ?? "",
+            behördeName: parsed.behördeName ?? parsed["behördeName"] ?? "",
+            behördeAdresse: parsed.behördeAdresse ?? parsed["behördeAdresse"] ?? "",
+            aktenzeichen: parsed.aktenzeichen ?? "",
+          };
+        } catch { /* ignore */ }
+      }
+      console.log("[briefkopf] JSON parse failed, first 200:", jsonStr.slice(0, 200));
     }
   }
 
