@@ -69,7 +69,7 @@ export async function POST(
 
   try {
     assistantId = await createAssistant();
-    threadId = await createThreadWithPdf(text);
+    threadId = await createThreadWithPdf(text, bkData.nutzerName || undefined);
     response = await runAndGetResponse(threadId, assistantId);
   } catch (err) {
     console.error("[analyze] Assistant error", err);

@@ -48,11 +48,15 @@ export async function createAssistant(): Promise<string> {
   return assistant.id;
 }
 
-export async function createThreadWithPdf(pdfText: string): Promise<string> {
+export async function createThreadWithPdf(pdfText: string, nutzerName?: string): Promise<string> {
+  const nameHint = nutzerName
+    ? `\n\n[Hinweis: Der vollständige Name des Nutzers lautet: ${nutzerName}. Bitte diesen Namen im finalen Schreiben verwenden und NICHT erneut danach fragen.]`
+    : "";
+
   const thread = await openai.beta.threads.create({
     messages: [{
       role: "user",
-      content: `Hier ist das Behördenschreiben:\n\n${pdfText.slice(0, 20000)}`,
+      content: `Hier ist das Behördenschreiben:\n\n${pdfText.slice(0, 20000)}${nameHint}`,
     }],
   });
   return thread.id;
