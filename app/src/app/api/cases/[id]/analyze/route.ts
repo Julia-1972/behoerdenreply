@@ -18,6 +18,16 @@ Lies den folgenden Brief und erstelle eine kurze, strukturierte interne Zusammen
 - Fristen, falls genannt
 - fehlende Informationen, die für eine Antwort benötigt werden
 
+Füge am Ende der Zusammenfassung diesen Block mit Metadaten hinzu (exakt so formatiert, keine Auslassungen):
+
+---BRIEFKOPF---
+NUTZER_NAME: [Vollständiger Name des Briefempfängers laut Adressfeld]
+NUTZER_ADRESSE: [Straße Hausnummer, PLZ Ort des Briefempfängers]
+BEHOERDE_NAME: [Vollständiger Name der Behörde/Institution]
+BEHOERDE_ADRESSE: [Postanschrift der Behörde]
+AKTENZEICHEN: [Mein Zeichen / Ihr Zeichen / Kundennummer aus dem Schreiben, oder "keines"]
+---ENDE---
+
 Diese Zusammenfassung ist nur für die interne Weiterverarbeitung und wird dem Nutzer nicht direkt angezeigt.`;
 
 export async function POST(

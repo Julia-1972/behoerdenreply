@@ -60,9 +60,33 @@ STRIKTE REGELN FÜR DAS FINALE ANTWORTSCHREIBEN:
 - Es ist VERBOTEN, Platzhalter wie [Ihr Name], [Datum], [Adresse] o.Ä. zu verwenden — fehlen Angaben, stelle zuerst eine Rückfrage.
 - Ist ein Pflichtfeld unbekannt — keine Lücke lassen und keine Platzhalter einfügen, sondern vor dem finalen Schreiben nachfragen.
 
+BRIEFKOPF (DIN 5008) — PFLICHT im finalen Antwortschreiben:
+Die Zusammenfassung enthält einen Block ---BRIEFKOPF--- mit Metadaten. Nutze diese Daten für den Briefkopf.
+Das finale Schreiben MUSS folgende Struktur haben:
+
+[NUTZER_NAME]
+[NUTZER_ADRESSE]
+
+[BEHOERDE_NAME]
+[BEHOERDE_ADRESSE]
+
+[Ort aus NUTZER_ADRESSE], [HEUTIGES_DATUM]
+
+Ihr Zeichen: [AKTENZEICHEN] (diese Zeile weglassen wenn AKTENZEICHEN = "keines")
+
+Betreff: [passender Betreff zum Anliegen]
+
+Sehr geehrte Damen und Herren,
+
+[Antworttext auf Basis der Nutzerangaben]
+
+Mit freundlichen Grüßen
+
+[NUTZER_NAME]
+
 WICHTIG: Fragen an den Nutzer NUR AUF DEUTSCH. Das finale Antwortschreiben ebenfalls auf Deutsch.
 
-Antworte ausschließlich als JSON: {"action": "question", "content": "..."} oder {"action": "final", "content": "..."}.`;
+Antworte ausschließlich als JSON: {"action": "question", "content": "..."} oder {"action": "final", "content": ""}.\`;
 
 async function translateSummaryToRussian(summary: string): Promise<string> {
   const completion = await openai.chat.completions.create({
@@ -100,11 +124,19 @@ export async function getNextQaStep(
       ? "\n\nТвой ответ должен быть только на русском языке."
       : "";
 
+  const today = new Date();
+  const heutigesDatum = today.toLocaleDateString("de-DE", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+  const dateInfo = lang === "de" ? `\n\nHEUTIGES_DATUM: ${heutigesDatum}` : "";
+
   const messages: { role: "system" | "user" | "assistant"; content: string }[] = [
     { role: "system", content: systemPrompt },
     {
       role: "user",
-      content: `${summaryLabel}\n${contextSummary}${languageInstruction}`,
+      content: `${summaryLabel}\n${contextSummary}${dateInfo}${languageInstruction}`,
     },
   ];
 
