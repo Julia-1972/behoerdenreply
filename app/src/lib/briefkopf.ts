@@ -7,20 +7,26 @@ export interface BriefkopfData {
 }
 
 export function parseBriefkopf(analysisSummary: string): BriefkopfData | null {
-  const match = analysisSummary.match(/---BRIEFKOPF---([\s\S]*?)---ENDE---/);
-  if (!match) return null;
+  const match = analysisSummary.match(/---\s*BRIEFKOPF\s*---([\s\S]*?)---\s*ENDE\s*---/i);
+  console.log("[briefkopf] block found:", !!match, "summary length:", analysisSummary.length);
+  if (!match) {
+    console.log("[briefkopf] summary tail:", analysisSummary.slice(-500));
+    return null;
+  }
 
   const block = match[1];
   const get = (key: string) =>
-    (block.match(new RegExp(`${key}:\\s*(.+)`)) ?? [])[1]?.trim() ?? "";
+    (block.match(new RegExp(`${key}\\s*:\\s*(.+)`)) ?? [])[1]?.trim() ?? "";
 
-  return {
+  const data: BriefkopfData = {
     nutzerName: get("NUTZER_NAME"),
     nutzerAdresse: get("NUTZER_ADRESSE"),
     behördeName: get("BEHOERDE_NAME"),
     behördeAdresse: get("BEHOERDE_ADRESSE"),
     aktenzeichen: get("AKTENZEICHEN"),
   };
+  console.log("[briefkopf] parsed:", JSON.stringify(data));
+  return data;
 }
 
 export function buildDin5008Header(data: BriefkopfData, date: string): string {
