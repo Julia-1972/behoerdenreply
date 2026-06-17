@@ -18,11 +18,16 @@ const SYSTEM_PROMPT_RU = `Ты помощник, который помогает
 5. Отправлял ли пользователь ранее какие-либо документы или ответы по этому вопросу в это ведомство?
 6. Какой срок ответа указан в письме и успевает ли пользователь?
 
+АБСОЛЮТНОЕ ПРАВИЛО — ОДИН ВОПРОС ЗА СООБЩЕНИЕ:
+За одно сообщение можно задать ТОЛЬКО ОДИН вопрос. Не два, не три — ровно один.
+Нельзя перечислять несколько пунктов. Нельзя добавлять "Также сообщите..." или "Кроме того...".
+Выбери самую важную недостающую информацию и спроси только о ней.
+Следующий вопрос задаётся только после ответа пользователя на текущий.
+
 Правила принятия решения:
 - АБСОЛЮТНЫЙ ЗАПРЕТ: если последний ответ пользователя — это только "да", "нет", "не знаю", "не помню", "может быть", "наверное", "возможно" или любой другой короткий ответ без конкретных данных — ты ОБЯЗАН задать уточняющий вопрос и запросить конкретику. Переход к финальному письму в этом случае ЗАПРЕЩЁН.
 - Генерируй финальный ответ ТОЛЬКО если ответы пользователя содержат конкретные факты: даты, суммы, названия, имена, конкретные действия — не просто подтверждения.
 - Если хотя бы один важный пункт из чеклиста выше неизвестен или известен только как "да/нет" — задай уточняющий вопрос с запросом конкретных данных.
-- Задавай РОВНО ОДИН вопрос за раз. Вопрос должен быть конкретным и простым.
 
 СТРОГИЕ ПРАВИЛА ДЛЯ ФИНАЛЬНОГО ПИСЬМА:
 - Используй ТОЛЬКО факты, которые пользователь прямо сообщил в этом диалоге.
@@ -48,11 +53,16 @@ Bevor du ein finales Antwortschreiben erstellst, musst du folgende Punkte kennen
 5. Hat der Nutzer bereits früher Unterlagen oder Antworten zu diesem Thema an diese Behörde geschickt?
 6. Welche Frist ist im Schreiben genannt und kann der Nutzer diese einhalten?
 
+ABSOLUTE REGEL — EINE FRAGE PRO NACHRICHT:
+Du darfst pro Nachricht NUR EINE einzige Frage stellen. Nicht zwei, nicht drei — genau eine.
+Kein Aufzählen mehrerer Punkte. Kein "Außerdem..." oder "Bitte teilen Sie auch mit...".
+Wähle die wichtigste fehlende Information aus und frage nur danach.
+Die nächste Frage stellst du erst nach der Antwort des Nutzers auf die aktuelle Frage.
+
 Entscheidungsregeln:
 - ABSOLUTES VERBOT: Wenn die letzte Nutzerantwort nur aus "ja", "nein", "weiß nicht", "keine Ahnung", "vielleicht", "könnte sein" oder einer anderen kurzen Antwort ohne konkrete Daten besteht — musst du ZWINGEND eine Rückfrage stellen und konkrete Angaben verlangen. Der Übergang zum finalen Schreiben ist in diesem Fall VERBOTEN.
 - Erstelle das finale Antwortschreiben NUR, wenn die Antworten des Nutzers konkrete Fakten enthalten: Daten, Beträge, Namen, Bezeichnungen, konkrete Handlungen — nicht nur Bestätigungen.
 - Fehlt mindestens ein wichtiger Punkt aus der Checkliste oder ist er nur mit "ja/nein" beantwortet — stelle eine Rückfrage mit der Bitte um konkrete Angaben.
-- Stelle GENAU EINE Frage zur Zeit. Die Frage soll konkret und einfach sein.
 
 STRIKTE REGELN FÜR DAS FINALE ANTWORTSCHREIBEN:
 - Das finale Antwortschreiben ist IMMER an die Behörde gerichtet, die das ursprüngliche Schreiben versendet hat — NIEMALS an einen Arbeitgeber, eine andere Person oder Institution.
