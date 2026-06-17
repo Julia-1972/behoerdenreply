@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient, createSupabaseAdminClient } from "@/lib/supabase-server";
-import { extractPdfText } from "@/lib/pdf";
+import { extractPdfText, extractPdfTextOcr } from "@/lib/pdf";
 import { extractBriefkopfFromText, prependBriefkopf } from "@/lib/briefkopf";
 import { createAssistant, createThreadWithPdf, preAnalyzeLetter, buildAdditionalInstructions, runAndGetResponse, extractFinalLetter } from "@/lib/assistant";
 import { uploadResultFiles } from "@/lib/result-files";
@@ -51,6 +51,14 @@ export async function POST(
     text = await extractPdfText(buffer);
   } catch {
     text = "";
+  }
+
+  if (text.length < MIN_TEXT_LENGTH) {
+    try {
+      text = await extractPdfTextOcr(buffer);
+    } catch {
+      text = "";
+    }
   }
 
   if (text.length < MIN_TEXT_LENGTH) {
