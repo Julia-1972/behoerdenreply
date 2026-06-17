@@ -3,46 +3,26 @@ import { openai } from "./openai";
 export const FINAL_MARKER_START = "===FINALES_SCHREIBEN_START===";
 export const FINAL_MARKER_END = "===FINALES_SCHREIBEN_ENDE===";
 
-const ASSISTANT_INSTRUCTIONS_DE = `Du bist ein erfahrener deutscher Rechts- und Sozialberater. Du hilfst Menschen, auf amtliche Behördenschreiben zu reagieren. Du kennst das deutsche Sozialrecht, Steuerrecht und Verwaltungsrecht.
+const ASSISTANT_INSTRUCTIONS_DE = `Du hilfst Nutzern dabei, auf Schreiben von deutschen Behörden zu antworten. Du kennst deutsches Sozialrecht, Steuerrecht und Verwaltungsrecht.
 
-Du erhältst den vollständigen Text eines Behördenschreibens.
+Bei deiner ERSTEN Nachricht: Erkläre dem Nutzer in 2-3 Sätzen den rechtlichen Kontext aus der VORANALYSE — nenne konkrete Paragraphen und was das für den Nutzer bedeutet. Dann stelle deine erste Frage.
 
-DEIN INNERES VORGEHEN (niemals dem Nutzer zeigen):
-Analysiere still für dich: Welche Behörde, welches Rechtsgebiet, welche rechtlichen Konsequenzen für den Nutzer, welche Risiken, welche Chancen?
+Stelle pro Nachricht höchstens eine Frage. Nach maximal 3 Fragen schreibe das Antwortschreiben SOFORT — egal ob du noch Fragen hättest. Frage NIEMALS erneut nach Informationen, die der Nutzer bereits gegeben hat. Wiederhole keine Ratschläge. Wenn der Nutzer seine Position klar gemacht hat, ist das Schreiben dran — nicht noch eine Frage. VERBOTEN: "Soll ich ein Antwortschreiben vorbereiten?", "Soll ich ein Schreiben erstellen?", "Möchten Sie, dass ich ein Schreiben verfasse?" — diese Fragen sind absolut unzulässig. Schreibe das Schreiben einfach. Es geht immer an die Behörde, die das Originalschreiben geschickt hat.
 
-DEINE ANTWORT AN DEN NUTZER — kurz und direkt, ohne Überschriften oder Strukturmarker:
+Im finalen Antwortschreiben: Wenn rechtliche Aussagen gemacht werden, immer den konkreten Gesetzesparagraphen angeben.
 
-Schreibe einfach 2-3 Sätze Erklärung, dann direkt die Frage. Keine "Teil 1", "Teil 2", keine Aufzählungen.
-
-Stil:
-- Einfache, freundliche Sprache — kein Behördendeutsch
-- Immer "Sie" — niemals dritte Person ("Frau X hat...")
-- Nur das Wichtigste — keine Nebenpunkte die noch nicht relevant sind
-- Beispiel Nebentätigkeit + ALG: "Die Behörde möchte Ihr Nebeneinkommen prüfen. Bis 165 € im Monat wird es nicht auf Ihr ALG angerechnet — alles darüber reduziert es anteilig. Stimmt es, dass Sie seit dem 1. Juni 2025 bei dieser Firma tätig sind?"
-
-Eine Frage — die wichtigste zuerst:
-- Wenn Nutzer "nein" antwortet: frage nach den richtigen Angaben, wiederhole niemals dieselbe Frage
-- Frage nicht nach Dingen, die bereits im Schreiben stehen
-
-FINALES ANTWORTSCHREIBEN — wenn du alle nötigen Fakten hast:
-- Schützt die Interessen des Nutzers
-- Rechtlich korrekt
-- IMMER an die Behörde gerichtet, die das Originalschreiben versandt hat — niemals an Arbeitgeber oder andere
-- Nur Fakten die der Nutzer genannt hat — keine Platzhalter
-- Beginnt direkt mit "Betreff:" (Absender/Datum wird automatisch ergänzt)
-
-FORMAT — wenn das Schreiben fertig ist, antworte exakt so:
+Wenn das Schreiben fertig ist, gib es in genau diesem Format aus, ohne Text davor oder danach:
 
 ${FINAL_MARKER_START}
-Betreff: [passender Betreff]
+Betreff: <Betreff>
 
 Sehr geehrte Damen und Herren,
 
-[Antworttext]
+<Text>
 
 Mit freundlichen Grüßen
 
-[Name des Nutzers]
+<Name des Nutzers>
 ${FINAL_MARKER_END}`;
 
 export async function createAssistant(): Promise<string> {
@@ -52,6 +32,31 @@ export async function createAssistant(): Promise<string> {
     instructions: ASSISTANT_INSTRUCTIONS_DE,
   });
   return assistant.id;
+}
+
+export async function preAnalyzeLetter(pdfText: string): Promise<string> {
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4o",
+    messages: [
+      {
+        role: "system",
+        content: `Du bist Experte für deutsches Verwaltungs-, Sozial- und Steuerrecht. Analysiere das folgende Behördenschreiben und erstelle eine strukturierte Kurzanalyse auf Deutsch mit genau diesen Abschnitten:
+
+SITUATION: [Typ des Schreibens, betroffene Behörde, Kernthema in 1-2 Sätzen]
+BEREITS BEKANNT: [Alle relevanten Fakten, die direkt aus dem Schreiben hervorgehen — Name, Datum, Aktenzeichen, Beträge, Fristen, etc.]
+RECHTLICHER KONTEXT: [Anwendbare Gesetze, Paragraphen, Freibeträge, Fristen — konkret und vollständig]
+FEHLENDE INFORMATIONEN: [Was fehlt für eine vollständige Antwort — nur das, was NICHT im Schreiben steht]
+HANDLUNGSEMPFEHLUNG: [Was sollte die Antwort bezwecken — Widerspruch, Bestätigung, Ergänzung, etc.]`,
+      },
+      {
+        role: "user",
+        content: pdfText.slice(0, 20000),
+      },
+    ],
+    max_tokens: 800,
+  });
+
+  return completion.choices[0]?.message?.content ?? "";
 }
 
 export async function createThreadWithPdf(pdfText: string, nutzerName?: string): Promise<string> {
@@ -68,6 +73,18 @@ export async function createThreadWithPdf(pdfText: string, nutzerName?: string):
   return thread.id;
 }
 
+export function buildAdditionalInstructions(preAnalysis: string, isFirstRun = false): string {
+  const firstRunRule = isFirstRun
+    ? `- In dieser ersten Nachricht: Erkläre dem Nutzer kurz den rechtlichen Kontext aus "RECHTLICHER KONTEXT" — konkrete Paragraphen, relevante Rechte oder Konsequenzen.\n`
+    : "";
+  return `VORANALYSE DES SCHREIBENS (Pflichtlektüre):
+${preAnalysis}
+
+Regeln:
+${firstRunRule}- Alle unter "BEREITS BEKANNT" genannten Fakten NIEMALS erfragen.
+- Frage nur nach Informationen aus "FEHLENDE INFORMATIONEN".`;
+}
+
 export async function addUserMessage(threadId: string, content: string): Promise<void> {
   await openai.beta.threads.messages.create(threadId, {
     role: "user",
@@ -75,9 +92,10 @@ export async function addUserMessage(threadId: string, content: string): Promise
   });
 }
 
-export async function runAndGetResponse(threadId: string, assistantId: string): Promise<string> {
+export async function runAndGetResponse(threadId: string, assistantId: string, additionalInstructions?: string): Promise<string> {
   const run = await openai.beta.threads.runs.createAndPoll(threadId, {
     assistant_id: assistantId,
+    ...(additionalInstructions ? { additional_instructions: additionalInstructions } : {}),
   });
 
   if (run.status !== "completed") {

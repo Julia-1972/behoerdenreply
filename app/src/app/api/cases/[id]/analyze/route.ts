@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createSupabaseServerClient, createSupabaseAdminClient } from "@/lib/supabase-server";
 import { extractPdfText } from "@/lib/pdf";
 import { extractBriefkopfFromText, prependBriefkopf } from "@/lib/briefkopf";
-import { createAssistant, createThreadWithPdf, runAndGetResponse, extractFinalLetter } from "@/lib/assistant";
+import { createAssistant, createThreadWithPdf, preAnalyzeLetter, buildAdditionalInstructions, runAndGetResponse, extractFinalLetter } from "@/lib/assistant";
 import { uploadResultFiles } from "@/lib/result-files";
 
 export const maxDuration = 60;
@@ -67,19 +67,22 @@ export async function POST(
   let threadId: string;
   let response: string;
 
+  let preAnalysisText = "";
   try {
+    preAnalysisText = await preAnalyzeLetter(text);
+    const additionalInstructions = buildAdditionalInstructions(preAnalysisText, true);
     assistantId = await createAssistant();
     threadId = await createThreadWithPdf(text, bkData.nutzerName || undefined);
-    response = await runAndGetResponse(threadId, assistantId);
+    response = await runAndGetResponse(threadId, assistantId, additionalInstructions);
   } catch (err) {
     console.error("[analyze] Assistant error", err);
     await supabase.from("cases").update({ status: "cancelled", error_reason: "ai_error" }).eq("id", id);
     return NextResponse.json({ error: "ai_error" }, { status: 502 });
   }
 
-  // Save thread_id and analysis_summary
+  // Save thread_id, analysis_summary and pre-analysis for debugging
   await supabase.from("cases").update({
-    analysis_summary: analysisSummary,
+    analysis_summary: analysisSummary + (preAnalysisText ? "\n\nPRE_ANALYSIS:\n" + preAnalysisText : ""),
     thread_id: threadId,
   }).eq("id", id);
 

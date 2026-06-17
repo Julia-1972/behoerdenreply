@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createSupabaseServerClient, createSupabaseAdminClient } from "@/lib/supabase-server";
 import { uploadResultFiles, getResultSignedUrls } from "@/lib/result-files";
 import { prependBriefkopf } from "@/lib/briefkopf";
-import { createAssistant, addUserMessage, runAndGetResponse, extractFinalLetter } from "@/lib/assistant";
+import { createAssistant, addUserMessage, runAndGetResponse, extractFinalLetter, buildAdditionalInstructions } from "@/lib/assistant";
 
 export const maxDuration = 60;
 
@@ -44,9 +44,11 @@ export async function POST(
   // Add answer to thread and get AI response
   let response: string;
   try {
+    const preAnalysisText = caseData.analysis_summary?.split("\n\nPRE_ANALYSIS:\n")[1] ?? "";
+    const additionalInstructions = preAnalysisText ? buildAdditionalInstructions(preAnalysisText) : undefined;
     const assistantId = await createAssistant();
     await addUserMessage(caseData.thread_id, answer);
-    response = await runAndGetResponse(caseData.thread_id, assistantId);
+    response = await runAndGetResponse(caseData.thread_id, assistantId, additionalInstructions);
   } catch (err) {
     console.error("[answer] Assistant error", err);
     await supabase.from("cases").update({ status: "cancelled", error_reason: "ai_error" }).eq("id", id);
