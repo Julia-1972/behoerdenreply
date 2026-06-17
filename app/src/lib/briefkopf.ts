@@ -77,5 +77,8 @@ export function prependBriefkopf(
   const bodyStart = letterBody.search(/Betreff:|Sehr geehrte/i);
   const body = bodyStart !== -1 ? letterBody.slice(bodyStart) : letterBody;
 
-  return buildDin5008Header(data, date) + body;
+  // Replace any leftover placeholders with real name
+  const cleanBody = body.replace(/\[Ihr Name\]|\[Name\]|\[Vor- und Nachname\]/gi, data.nutzerName);
+
+  return buildDin5008Header(data, date) + cleanBody;
 }

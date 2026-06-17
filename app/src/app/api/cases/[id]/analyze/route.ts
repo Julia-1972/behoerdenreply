@@ -19,11 +19,16 @@ Lies den folgenden Brief und erstelle eine kurze, strukturierte interne Zusammen
 - Fristen, falls genannt
 - fehlende Informationen, die für eine Antwort benötigt werden
 
-Füge am Ende der Zusammenfassung exakt diesen JSON-Block hinzu (keine Auslassungen, kein Markdown):
-
-BRIEFKOPF_JSON:{"nutzerName":"[Vollständiger Name des Briefempfängers]","nutzerAdresse":"[Straße Hausnummer, PLZ Ort]","behördeName":"[Vollständiger Name der Behörde]","behördeAdresse":"[PLZ Ort der Behörde]","aktenzeichen":"[Mein Zeichen oder Kundennummer, oder keines]"}
-
 Diese Zusammenfassung ist nur für die interne Weiterverarbeitung und wird dem Nutzer nicht direkt angezeigt.`;
+
+const BRIEFKOPF_EXTRACT_PROMPT = `Du extrahierst Metadaten aus einem deutschen Behördenschreiben. Antworte ausschließlich als JSON-Objekt mit diesen Feldern:
+{
+  "nutzerName": "Vollständiger Name des Briefempfängers (Person die antwortet)",
+  "nutzerAdresse": "Straße Hausnummer, PLZ Ort des Briefempfängers",
+  "behördeName": "Vollständiger Name der Behörde/Institution",
+  "behördeAdresse": "Postanschrift der Behörde (PLZ Ort)",
+  "aktenzeichen": "Mein Zeichen, Ihr Zeichen oder Kundennummer aus dem Schreiben (oder leer lassen)"
+}`;
 
 export async function POST(
   request: Request,
@@ -127,6 +132,23 @@ export async function POST(
       .eq("id", id);
 
     return NextResponse.json({ error: "ai_error" }, { status: 502 });
+  }
+
+  // Second call: extract Briefkopf metadata as structured JSON
+  try {
+    const bkCompletion = await openai.chat.completions.create({
+      model: AI_MODEL,
+      messages: [
+        { role: "system", content: BRIEFKOPF_EXTRACT_PROMPT },
+        { role: "user", content: text.slice(0, 4000) },
+      ],
+      response_format: { type: "json_object" },
+    });
+    const bkJson = bkCompletion.choices[0]?.message?.content ?? "{}";
+    analysisSummary = analysisSummary + "\nBRIEFKOPF_JSON:" + bkJson;
+    console.log("[analyze debug] briefkopf extracted:", bkJson);
+  } catch (err) {
+    console.error("[analyze] briefkopf extraction error (non-fatal):", err);
   }
 
   console.log("[analyze debug] saving analysis_summary to DB ...");
