@@ -74,7 +74,7 @@ Mit freundlichen Grüßen
 
 [Name des Nutzers aus dem Dialog]
 
-Antworte ausschließlich als JSON: {"action": "question", "content": "..."} oder {"action": "final", "content": ""}.\`;
+Antworte ausschließlich als JSON: {"action": "question", "content": "..."} oder {"action": "final", "content": ""}.`;
 
 async function translateSummaryToRussian(summary: string): Promise<string> {
   const completion = await openai.chat.completions.create({
