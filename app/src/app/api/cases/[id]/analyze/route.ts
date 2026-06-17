@@ -4,7 +4,7 @@ import { extractPdfText } from "@/lib/pdf";
 import { openai, AI_MODEL } from "@/lib/openai";
 import { getNextQaStep } from "@/lib/qa";
 import { uploadResultFiles } from "@/lib/result-files";
-import { prependBriefkopf } from "@/lib/briefkopf";
+import { prependBriefkopf, extractBriefkopfFromText } from "@/lib/briefkopf";
 
 export const maxDuration = 60;
 
@@ -134,22 +134,10 @@ export async function POST(
     return NextResponse.json({ error: "ai_error" }, { status: 502 });
   }
 
-  // Second call: extract Briefkopf metadata as structured JSON
-  try {
-    const bkCompletion = await openai.chat.completions.create({
-      model: AI_MODEL,
-      messages: [
-        { role: "system", content: BRIEFKOPF_EXTRACT_PROMPT },
-        { role: "user", content: text.slice(0, 4000) },
-      ],
-      response_format: { type: "json_object" },
-    });
-    const bkJson = bkCompletion.choices[0]?.message?.content ?? "{}";
-    analysisSummary = analysisSummary + "\nBRIEFKOPF_JSON:" + bkJson;
-    console.log("[analyze debug] briefkopf extracted:", bkJson);
-  } catch (err) {
-    console.error("[analyze] briefkopf extraction error (non-fatal):", err);
-  }
+  // Extract Briefkopf from raw PDF text (no extra AI call needed)
+  const bkData = extractBriefkopfFromText(text);
+  console.log("[analyze debug] briefkopf from text:", JSON.stringify(bkData));
+  analysisSummary = analysisSummary + "\nBRIEFKOPF_JSON:" + JSON.stringify(bkData);
 
   console.log("[analyze debug] saving analysis_summary to DB ...");
   await supabase

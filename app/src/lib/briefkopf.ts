@@ -6,6 +6,53 @@ export interface BriefkopfData {
   aktenzeichen: string;
 }
 
+/** Extract Briefkopf from raw PDF text without AI */
+export function extractBriefkopfFromText(pdfText: string): BriefkopfData {
+  const lines = pdfText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+
+  // Aktenzeichen patterns
+  const azMatch = pdfText.match(/(?:Mein Zeichen|Ihr Zeichen|Kundennummer|Geschäftszeichen)[:\s]+([A-Z0-9\/\-\.]+)/i);
+  const aktenzeichen = azMatch?.[1]?.trim() ?? "";
+
+  // Behörde: first meaningful institution line (usually top of letter)
+  const behördePatterns = [
+    /Agentur für Arbeit\s+[\w\s\.]+/i,
+    /Jobcenter\s+[\w\s\.]+/i,
+    /Finanzamt\s+[\w\s\.]+/i,
+    /Bundesagentur für Arbeit/i,
+    /(?:Amt|Behörde|Ministerium|Verwaltung)\s+\w+/i,
+  ];
+  let behördeName = "";
+  for (const pat of behördePatterns) {
+    const m = pdfText.match(pat);
+    if (m) { behördeName = m[0].trim(); break; }
+  }
+
+  // Behörde address: look for PLZ + city after behörde name
+  const behördeAdresseMatch = pdfText.match(/(\d{5}\s+[\wäöüÄÖÜß\s]+?)(?:\n|Postanschrift|Internet|Bankverbindung)/);
+  const behördeAdresse = behördeAdresseMatch?.[1]?.trim() ?? "";
+
+  // Nutzer: find name+address block (name + Straße + PLZ)
+  // Pattern: line with "Vorname Nachname" followed by "Straße Nr" and "PLZ Ort"
+  let nutzerName = "";
+  let nutzerAdresse = "";
+  for (let i = 0; i < lines.length - 2; i++) {
+    const line = lines[i];
+    const next = lines[i + 1];
+    const next2 = lines[i + 2];
+    // Name line: 2-3 words, no digits, no special chars
+    if (/^[A-ZÄÖÜ][a-zäöüß]+ [A-ZÄÖÜ][a-zäöüß]+/.test(line) &&
+        /\d/.test(next) && // street has number
+        /^\d{5}/.test(next2)) { // PLZ
+      nutzerName = line;
+      nutzerAdresse = `${next}, ${next2}`;
+      break;
+    }
+  }
+
+  return { nutzerName, nutzerAdresse, behördeName, behördeAdresse, aktenzeichen };
+}
+
 export function parseBriefkopf(analysisSummary: string): BriefkopfData | null {
   // Try JSON format: BRIEFKOPF_JSON:{...} (may be multiline)
   const jsonIdx = analysisSummary.indexOf("BRIEFKOPF_JSON:");
