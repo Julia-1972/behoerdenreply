@@ -49,14 +49,19 @@ export async function POST(
   let text = "";
   try {
     text = await extractPdfText(buffer);
-  } catch {
+    console.log("[analyze] pdf-parse extracted:", text.length, "chars, preview:", text.slice(0, 100));
+  } catch (e) {
+    console.log("[analyze] pdf-parse error:", e);
     text = "";
   }
 
   if (text.length < MIN_TEXT_LENGTH) {
+    console.log("[analyze] text too short, trying OCR...");
     try {
       text = await extractPdfTextOcr(buffer);
-    } catch {
+      console.log("[analyze] OCR extracted:", text.length, "chars, preview:", text.slice(0, 100));
+    } catch (e) {
+      console.log("[analyze] OCR error:", e);
       text = "";
     }
   }
