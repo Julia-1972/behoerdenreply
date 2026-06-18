@@ -20,7 +20,7 @@ export default function Home() {
         </span>
         <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
           <Link href="/login" className="btn-outline-white">Anmelden</Link>
-          <Link href="/login" className="btn-gold">Kostenlos starten →</Link>
+          <Link href="/login" className="btn-gold">STARTEN</Link>
         </div>
       </nav>
 
@@ -47,7 +47,7 @@ export default function Home() {
               ))}
             </div>
             <Link href="/login" className="btn-violet" style={{ fontSize: "1.05rem", marginBottom: "10px", display: "inline-flex" }}>
-              Jetzt kostenlos starten →
+              STARTEN
             </Link>
             <p style={{ fontSize: "12px", color: "#999", marginBottom: "16px" }}>1 Dokument kostenlos · Keine Kreditkarte</p>
             <div style={{ display: "flex", gap: "1.25rem", flexWrap: "wrap" }}>
@@ -134,7 +134,7 @@ export default function Home() {
             Laden Sie Ihr Dokument hoch — und in wenigen Minuten wissen Sie, was zu tun ist.
           </p>
           <Link href="/login" className="btn-gold" style={{ fontSize: "1.05rem", padding: "0.9rem 2.4rem" }}>
-            ✉ Jetzt kostenlos starten
+            STARTEN
           </Link>
         </div>
       </section>
