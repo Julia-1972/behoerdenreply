@@ -33,7 +33,7 @@ export async function extractPdfTextOcr(buffer: Buffer): Promise<string> {
           { type: "input_file", file_id: uploadedFile.id },
           {
             type: "input_text",
-            text: "Dies ist ein offizielles Schreiben einer deutschen Behoerde. Beschreibe vollstaendig: 1) Von welcher Behoerde stammt das Schreiben? 2) Was wird gefordert oder mitgeteilt? 3) Welche Fristen oder Daten werden genannt? 4) Welche Betraege, Aktenzeichen oder Paragraphen? 5) Welcher Name und Adresse des Empfaengers? Sei so detailliert wie moeglich, sodass jemand ohne Zugriff auf das Original vollstaendig informiert ist.",
+            text: "Dies ist ein offizielles Schreiben einer deutschen Behoerde. Beschreibe JEDE SEITE separat und vollstaendig. Dann beantworte: 1) Von welcher Behoerde stammt das Schreiben? 2) Was wird gefordert oder mitgeteilt? 3) Welche Fristen oder Daten werden genannt? 4) Welche Betraege, Aktenzeichen oder Paragraphen? 5) Name und Adresse des Empfaengers? 6) Welche konkreten Dokumente oder Nachweise werden angefordert - liste JEDEN einzelnen Punkt auf (z.B. Pass, Arbeitsvertrag, Kontoauszug, Krankenversicherung etc.). Sei maximal detailliert.",
           },
         ],
       }],
