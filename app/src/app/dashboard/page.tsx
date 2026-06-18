@@ -9,7 +9,6 @@ import UpgradeScreen from "./upgrade-screen";
 export default async function DashboardPage() {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
-
   if (!user) redirect("/login");
 
   const { data: profile } = await supabase
@@ -36,43 +35,37 @@ export default async function DashboardPage() {
   })();
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "var(--bg-subtle)" }}>
-
-      {/* Nav */}
-      <nav style={{ background: "var(--bg)", borderBottom: "1.5px solid var(--border)", padding: "0 2rem", height: "56px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 100 }}>
-        <Link href="/" style={{ fontWeight: 700, fontSize: "1.1rem", color: "var(--fg)", textDecoration: "none" }}>
-          Behörden<span style={{ color: "var(--primary)" }}>Reply</span>
+    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "var(--bg)" }}>
+      <nav style={{ background: "var(--bg-dark)", padding: "0 2.5rem", height: "68px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 100 }}>
+        <Link href="/" style={{ fontWeight: 800, fontSize: "1.2rem", color: "#fff", textDecoration: "none" }}>
+          Behörden<span style={{ color: "var(--gold)" }}>Reply</span>
         </Link>
         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <span style={{ fontSize: "0.85rem", color: "var(--fg-muted)" }}>{user.email}</span>
+          <span style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.6)" }}>{user.email}</span>
           <LogoutButton />
         </div>
       </nav>
 
-      {/* Content */}
       <main style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "3rem 2rem" }}>
-
         {activeCase ? (
-          <div className="card" style={{ maxWidth: "480px", width: "100%", textAlign: "center", padding: "2.5rem 2rem" }}>
+          <div style={{ background: "var(--bg-white)", borderRadius: "18px", padding: "2.5rem 2rem", maxWidth: "480px", width: "100%", textAlign: "center", boxShadow: "0 8px 40px rgba(30,18,69,0.08)", border: "1.5px solid var(--border)" }}>
             <div style={{ fontSize: "2rem", marginBottom: "1rem" }}>📋</div>
             <h2 style={{ fontSize: "1.25rem", fontWeight: 700, marginBottom: "0.5rem" }}>{t.activeCaseTitle}</h2>
             <p style={{ color: "var(--fg-muted)", fontSize: "0.9rem", marginBottom: "1.5rem" }}>Du hast einen offenen Fall. Mache dort weiter.</p>
-            <Link href={`/case/${activeCase.id}`} className="btn-primary" style={{ display: "block", textAlign: "center" }}>
+            <Link href={`/case/${activeCase.id}`} className="btn-gold" style={{ display: "block", textAlign: "center" }}>
               {t.activeCaseGoTo}
             </Link>
           </div>
         ) : profile?.free_used && profile.plan === "free" ? (
           <UpgradeScreen lang={lang} t={t} />
         ) : subscriptionLimitReached ? (
-          <div className="card" style={{ maxWidth: "480px", width: "100%", textAlign: "center", padding: "2.5rem 2rem" }}>
+          <div style={{ background: "var(--bg-white)", borderRadius: "18px", padding: "2.5rem 2rem", maxWidth: "480px", width: "100%", textAlign: "center", border: "1.5px solid var(--border)" }}>
             <p style={{ color: "var(--fg-muted)", fontSize: "0.9rem" }}>{t.upgradeSubscriptionLimitReached}</p>
           </div>
         ) : (
-          <div style={{ width: "100%", maxWidth: "560px", display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-            <div>
-              <h1 style={{ fontSize: "1.5rem", fontWeight: 700, marginBottom: "0.35rem" }}>{t.uploadTitle}</h1>
-              <p style={{ color: "var(--fg-muted)", fontSize: "0.9rem" }}>{t.uploadHint}</p>
-            </div>
+          <div style={{ width: "100%", maxWidth: "560px" }}>
+            <h1 style={{ fontSize: "1.6rem", fontWeight: 800, marginBottom: "0.35rem" }}>{t.uploadTitle}</h1>
+            <p style={{ color: "var(--fg-muted)", fontSize: "0.9rem", marginBottom: "1.75rem" }}>{t.uploadHint}</p>
             <UploadForm lang={lang} />
           </div>
         )}
