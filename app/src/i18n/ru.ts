@@ -7,7 +7,7 @@ export const ru = {
   registerButton: "Зарегистрироваться",
   switchToRegister: "Нет аккаунта? Зарегистрироваться",
   switchToLogin: "Уже есть аккаунт? Войти",
-  loginSubtitle: "Войди, чтобы открыть свои дела.",
+  loginSubtitle: "Войди, чтобы начать обработку.",
   registerSubtitle: "Создай аккаунт - первый документ бесплатно.",
   error: "Ошибка",
 
