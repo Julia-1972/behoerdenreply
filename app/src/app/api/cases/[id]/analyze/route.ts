@@ -82,9 +82,11 @@ export async function POST(
 
   let preAnalysisText = "";
   try {
-    preAnalysisText = await preAnalyzeLetter(text);
+    [preAnalysisText, assistantId] = await Promise.all([
+      preAnalyzeLetter(text),
+      createAssistant(),
+    ]);
     const additionalInstructions = buildAdditionalInstructions(preAnalysisText, true);
-    assistantId = await createAssistant();
     threadId = await createThreadWithPdf(text, bkData.nutzerName || undefined);
     response = await runAndGetResponse(threadId, assistantId, additionalInstructions);
   } catch (err) {
