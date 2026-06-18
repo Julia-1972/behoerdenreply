@@ -74,8 +74,8 @@ export default function LoginPage() {
           </p>
 
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-            <input type="email" required autoComplete="off" placeholder={t.email} value={email} onChange={(e) => setEmail(e.target.value)} className="input" />
-            <input type="password" required autoComplete="new-password" placeholder={t.password} value={password} onChange={(e) => setPassword(e.target.value)} className="input" />
+            <input type="text" required autoComplete="off" readOnly onFocus={(e) => e.target.removeAttribute("readOnly")} placeholder={t.email} value={email} onChange={(e) => setEmail(e.target.value)} className="input" />
+            <input type="password" required autoComplete="off" readOnly onFocus={(e) => e.target.removeAttribute("readOnly")} placeholder={t.password} value={password} onChange={(e) => setPassword(e.target.value)} className="input" />
 
             {error && (
               <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: "8px", padding: "0.625rem 0.875rem", fontSize: "0.875rem", color: "#dc2626" }}>
