@@ -25,9 +25,9 @@ export default function Home() {
       </nav>
 
       {/* HERO */}
-      <section style={{ background: "linear-gradient(90deg, #FFF9F2 0%, #FAF6F0 42%, #F4E9DA 100%)", padding: "4rem 2.5rem 3.5rem" }}>
-        <div style={{ maxWidth: "1100px", margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "3rem", alignItems: "center" }}>
-          <div>
+      <section style={{ background: "linear-gradient(90deg, #FFF9F2 0%, #FAF6F0 42%, #F4E9DA 100%)", padding: "0", overflow: "hidden" }}>
+        <div style={{ maxWidth: "1100px", margin: "0 auto", display: "grid", gridTemplateColumns: "48fr 52fr", gap: "0", alignItems: "stretch", minHeight: "480px" }}>
+          <div style={{ padding: "4rem 2.5rem 3.5rem" }}>
             <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "var(--lavender)", border: "1px solid var(--violet-pale)", borderRadius: "6px", padding: "5px 14px", marginBottom: "14px" }}>
               <div style={{ width: "7px", height: "7px", background: "var(--violet-mid)", borderRadius: "50%" }} />
               <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--violet)", letterSpacing: "0.1em", textTransform: "uppercase" }}>KI-gestützte Behördenhilfe</span>
@@ -60,21 +60,18 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Right card */}
-          <div style={{ background: "#fff", borderRadius: "18px", padding: "1.75rem", boxShadow: "0 8px 40px rgba(76,29,149,0.12)", border: "1px solid var(--border)" }}>
-            <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--fg-muted)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "0.875rem" }}>Analyse des Schreibens</div>
-            {["Organisation","Frist der Antwort","Risiken","Anforderungen","Gesetze"].map(item => (
-              <div key={item} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "0.5rem 0", borderBottom: "1px solid var(--border)" }}>
-                <div style={{ width: "20px", height: "20px", background: "#dcfce7", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", color: "#16a34a", fontWeight: 700, flexShrink: 0 }}>✓</div>
-                <span style={{ fontSize: "0.9rem", color: "var(--fg)" }}>{item}</span>
-              </div>
-            ))}
-            <div style={{ marginTop: "1.25rem", background: "var(--lavender)", borderRadius: "10px", padding: "1rem" }}>
-              <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--violet)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "0.5rem" }}>Ergebnis</div>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "0.9rem", color: "var(--violet)", fontWeight: 600 }}>
-                <span>📄</span> Fertige Antwort auf Deutsch
-              </div>
-            </div>
+          {/* Right — photo */}
+          <div style={{ position: "relative", overflow: "hidden", minHeight: "420px" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/hero.png"
+              alt="Deutsche Behördenbriefe auf dem Schreibtisch"
+              style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "90% 20%", display: "block", filter: "brightness(0.87) saturate(0.78)", position: "absolute", inset: 0 }}
+            />
+            {/* left fade overlay */}
+            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, #FAF6F0 0%, rgba(250,246,240,0.6) 22%, rgba(250,246,240,0.15) 38%, transparent 55%)", zIndex: 1, pointerEvents: "none" }} />
+            {/* warm tint */}
+            <div style={{ position: "absolute", inset: 0, background: "rgba(248,238,218,0.12)", zIndex: 1, pointerEvents: "none" }} />
           </div>
         </div>
       </section>
