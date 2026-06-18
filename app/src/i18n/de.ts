@@ -7,6 +7,8 @@ export const de = {
   registerButton: "Registrieren",
   switchToRegister: "Noch kein Konto? Registrieren",
   switchToLogin: "Bereits ein Konto? Anmelden",
+  loginSubtitle: "Melde dich an, um deine Fälle zu öffnen.",
+  registerSubtitle: "Erstelle ein Konto - das erste Dokument ist kostenlos.",
   error: "Fehler",
 
   uploadTitle: "Dokument hochladen",
@@ -16,6 +18,7 @@ export const de = {
   uploadErrorType: "Nur PDF-Dateien sind erlaubt",
   uploadErrorSize: "Datei ist zu groß (maximal 10 MB)",
   activeCaseTitle: "Du hast bereits einen aktiven Fall",
+  activeCaseSubtitle: "Du hast einen offenen Fall. Mache dort weiter.",
   activeCaseGoTo: "Zum Fall",
 
   analyzing: "Dokument wird analysiert...",

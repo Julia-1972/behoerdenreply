@@ -70,7 +70,7 @@ export default function LoginPage() {
             {mode === "login" ? t.login : t.register}
           </h1>
           <p style={{ color: "var(--fg-muted)", fontSize: "0.875rem", marginBottom: "1.75rem" }}>
-            {mode === "login" ? "Melde dich an, um deine Fälle zu öffnen." : "Erstelle ein Konto - das erste Dokument ist kostenlos."}
+            {mode === "login" ? t.loginSubtitle : t.registerSubtitle}
           </p>
 
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>

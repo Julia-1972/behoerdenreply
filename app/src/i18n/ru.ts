@@ -7,6 +7,8 @@ export const ru = {
   registerButton: "Зарегистрироваться",
   switchToRegister: "Нет аккаунта? Зарегистрироваться",
   switchToLogin: "Уже есть аккаунт? Войти",
+  loginSubtitle: "Войди, чтобы открыть свои дела.",
+  registerSubtitle: "Создай аккаунт - первый документ бесплатно.",
   error: "Ошибка",
 
   uploadTitle: "Загрузить документ",
@@ -16,6 +18,7 @@ export const ru = {
   uploadErrorType: "Разрешены только файлы PDF",
   uploadErrorSize: "Файл слишком большой (максимум 10 МБ)",
   activeCaseTitle: "У вас есть активный кейс",
+  activeCaseSubtitle: "У тебя есть открытое дело. Продолжи там.",
   activeCaseGoTo: "Перейти к кейсу",
 
   analyzing: "Анализируем документ...",

@@ -51,7 +51,7 @@ export default async function DashboardPage() {
           <div style={{ background: "var(--bg-white)", borderRadius: "18px", padding: "2.5rem 2rem", maxWidth: "480px", width: "100%", textAlign: "center", boxShadow: "0 8px 40px rgba(30,18,69,0.08)", border: "1.5px solid var(--border)" }}>
             <div style={{ fontSize: "2rem", marginBottom: "1rem" }}>📋</div>
             <h2 style={{ fontSize: "1.25rem", fontWeight: 700, marginBottom: "0.5rem" }}>{t.activeCaseTitle}</h2>
-            <p style={{ color: "var(--fg-muted)", fontSize: "0.9rem", marginBottom: "1.5rem" }}>Du hast einen offenen Fall. Mache dort weiter.</p>
+            <p style={{ color: "var(--fg-muted)", fontSize: "0.9rem", marginBottom: "1.5rem" }}>{t.activeCaseSubtitle}</p>
             <Link href={`/case/${activeCase.id}`} className="btn-gold" style={{ display: "block", textAlign: "center" }}>
               {t.activeCaseGoTo}
             </Link>
