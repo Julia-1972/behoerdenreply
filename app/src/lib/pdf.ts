@@ -13,23 +13,43 @@ export async function extractPdfTextOcr(buffer: Buffer): Promise<string> {
   const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength) as ArrayBuffer;
   const uploadedFile = await openai.files.create({
     file: new File([arrayBuffer], "document.pdf", { type: "application/pdf" }),
-    purpose: "user_data",
+    purpose: "assistants",
   });
 
+  let assistantId: string | null = null;
+  let threadId: string | null = null;
+
   try {
-    const response = await openai.chat.completions.create({
+    const assistant = await openai.beta.assistants.create({
+      name: "OCR",
       model: "gpt-4o",
+      tools: [{ type: "file_search" }],
+    });
+    assistantId = assistant.id;
+
+    const thread = await openai.beta.threads.create({
       messages: [{
         role: "user",
-        content: [
-          { type: "file", file: { file_id: uploadedFile.id } } as never,
-          { type: "text", text: "Lies dieses Behördenschreiben vollständig und gib den gesamten Text zurück. Nur der Text, keine Kommentare." },
-        ],
+        content: "Extrahiere den vollständigen Text aus dem angehängten Dokument. Gib nur den reinen Text aus, keine Kommentare.",
+        attachments: [{ file_id: uploadedFile.id, tools: [{ type: "file_search" }] }],
       }],
-      max_tokens: 4000,
     });
-    return response.choices[0]?.message?.content ?? "";
+    threadId = thread.id;
+
+    const run = await openai.beta.threads.runs.createAndPoll(threadId, {
+      assistant_id: assistantId,
+    });
+
+    if (run.status !== "completed") throw new Error("OCR run failed");
+
+    const messages = await openai.beta.threads.messages.list(threadId, { order: "desc", limit: 1 });
+    const content = messages.data[0]?.content[0];
+    if (!content || content.type !== "text") throw new Error("No text in OCR response");
+    return content.text.value;
+
   } finally {
+    if (threadId) await openai.beta.threads.delete(threadId).catch(() => {});
+    if (assistantId) await openai.beta.assistants.delete(assistantId).catch(() => {});
     await openai.files.delete(uploadedFile.id).catch(() => {});
   }
 }
