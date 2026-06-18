@@ -16,24 +16,19 @@ export async function extractPdfTextOcr(buffer: Buffer): Promise<string> {
   });
 
   try {
-    const completion = await openai.chat.completions.create({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const response = await (openai as any).responses.create({
       model: "gpt-4o",
-      messages: [{
+      input: [{
         role: "user",
         content: [
-          {
-            type: "file",
-            file: { file_id: uploadedFile.id },
-          } as never,
-          {
-            type: "text",
-            text: "Extrahiere den vollständigen Text aus diesem Dokument. Gib nur den reinen Text aus, keine Kommentare oder Erklaerungen.",
-          },
+          { type: "input_file", file_id: uploadedFile.id },
+          { type: "input_text", text: "Extrahiere den vollstaendigen Text aus diesem Dokument. Gib nur den reinen Text aus, keine Kommentare oder Erklaerungen." },
         ],
       }],
     });
 
-    return completion.choices[0]?.message?.content ?? "";
+    return (response as { output_text?: string }).output_text ?? "";
   } finally {
     await openai.files.delete(uploadedFile.id).catch(() => {});
   }
