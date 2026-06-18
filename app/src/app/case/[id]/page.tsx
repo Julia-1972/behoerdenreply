@@ -41,7 +41,7 @@ export default async function CasePage({ params }: { params: Promise<{ id: strin
 
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "var(--bg-subtle)" }}>
-      <nav style={{ background: "var(--bg)", borderBottom: "1.5px solid var(--border)", padding: "0 2rem", height: "56px", display: "flex", alignItems: "center", gap: "1rem" }}>
+      <nav style={{ background: "var(--bg)", borderBottom: "1.5px solid var(--border)", padding: "0 2rem", height: "56px", display: "flex", alignItems: "center", gap: "1rem", position: "sticky", top: 0, zIndex: 100 }}>
         <Link href="/dashboard" style={{ color: "var(--fg-muted)", textDecoration: "none", fontSize: "0.875rem", display: "flex", alignItems: "center", gap: "0.4rem" }}>
           ← Dashboard
         </Link>

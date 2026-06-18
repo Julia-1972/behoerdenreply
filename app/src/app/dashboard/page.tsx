@@ -39,7 +39,7 @@ export default async function DashboardPage() {
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "var(--bg-subtle)" }}>
 
       {/* Nav */}
-      <nav style={{ background: "var(--bg)", borderBottom: "1.5px solid var(--border)", padding: "0 2rem", height: "56px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <nav style={{ background: "var(--bg)", borderBottom: "1.5px solid var(--border)", padding: "0 2rem", height: "56px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 100 }}>
         <Link href="/" style={{ fontWeight: 700, fontSize: "1.1rem", color: "var(--fg)", textDecoration: "none" }}>
           Behörden<span style={{ color: "var(--primary)" }}>Reply</span>
         </Link>

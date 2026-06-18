@@ -11,7 +11,7 @@ export default async function Home() {
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "var(--bg)" }}>
 
       {/* Nav */}
-      <nav style={{ borderBottom: "1.5px solid var(--border)", padding: "0 2rem", height: "64px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <nav style={{ borderBottom: "1.5px solid var(--border)", padding: "0 2rem", height: "64px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, background: "var(--bg)", zIndex: 100 }}>
         <span style={{ fontWeight: 700, fontSize: "1.2rem", color: "var(--fg)" }}>
           Behörden<span style={{ color: "var(--primary)" }}>Reply</span>
         </span>
