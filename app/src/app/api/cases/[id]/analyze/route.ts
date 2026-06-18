@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient, createSupabaseAdminClient } from "@/lib/supabase-server";
-import { extractPdfText, extractPdfTextOcr } from "@/lib/pdf";
+import { extractPdfText, extractPdfTextOcr, isReadableText } from "@/lib/pdf";
 import { extractBriefkopfFromText, prependBriefkopf } from "@/lib/briefkopf";
 import { createAssistant, createThreadWithPdf, preAnalyzeLetter, buildAdditionalInstructions, runAndGetResponse, extractFinalLetter } from "@/lib/assistant";
 import { uploadResultFiles } from "@/lib/result-files";
@@ -55,18 +55,18 @@ export async function POST(
     text = "";
   }
 
-  if (text.length < MIN_TEXT_LENGTH) {
-    console.log("[analyze] text too short, trying OCR...");
+  if (text.length < MIN_TEXT_LENGTH || !isReadableText(text)) {
+    console.log("[analyze] text not readable (len:", text.length, "), trying OCR...");
     try {
       text = await extractPdfTextOcr(buffer);
-      console.log("[analyze] OCR extracted:", text.length, "chars, preview:", text.slice(0, 100));
+      console.log("[analyze] OCR extracted:", text.length, "chars, preview:", text.slice(0, 200));
     } catch (e) {
       console.log("[analyze] OCR error:", e);
       text = "";
     }
   }
 
-  if (text.length < MIN_TEXT_LENGTH) {
+  if (text.length < MIN_TEXT_LENGTH || !isReadableText(text)) {
     await supabase.from("cases").update({ status: "cancelled", error_reason: "unreadable" }).eq("id", id);
     return NextResponse.json({ error: "unreadable" }, { status: 422 });
   }
