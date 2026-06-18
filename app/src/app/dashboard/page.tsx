@@ -36,7 +36,7 @@ export default async function DashboardPage() {
 
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "var(--bg)" }}>
-      <nav style={{ background: "var(--bg-dark)", padding: "0 2.5rem", height: "68px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 100 }}>
+      <nav style={{ background: "linear-gradient(90deg, #1E1133 0%, #261245 55%, #1E1133 100%)", padding: "0 2.5rem", height: "72px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 100, boxShadow: "0 8px 32px rgba(30,17,51,0.28)" }}>
         <Link href="/" style={{ fontWeight: 800, fontSize: "1.2rem", color: "#fff", textDecoration: "none" }}>
           Behörden<span style={{ color: "var(--gold)" }}>Reply</span>
         </Link>

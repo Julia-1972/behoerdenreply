@@ -1,26 +1,36 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #FAF7F2;
-  --bg-white: #ffffff;
-  --bg-dark: #1E1245;
-  --fg: #1E1245;
-  --fg-muted: #6B6490;
-  --border: #E8E0D5;
-  --primary: #5B2D8E;
-  --primary-hover: #4a2275;
-  --primary-fg: #ffffff;
-  --gold: #C9862A;
-  --gold-hover: #b5771f;
-  --gold-fg: #ffffff;
-  --radius: 10px;
+  --font-sans: var(--font-dm-sans), 'DM Sans', Arial, sans-serif;
+  --font-serif: var(--font-dm-serif), 'DM Serif Display', Georgia, serif;
+
+  --violet:       #4C1D95;
+  --violet-mid:   #6B46C1;
+  --violet-light: #7B5EA7;
+  --violet-pale:  #C4B5FD;
+  --violet-frost: #F5F0FF;
+  --lavender:     #EDE7F6;
+  --plum:         #3D2578;
+  --sand:         #FAF6F0;
+  --sand-dark:    #F4E9DA;
+  --gold:         #D99A45;
+  --gold-hover:   #c48a35;
+  --nav-bg:       #1E1133;
+  --nav-bg2:      #261245;
+
+  --bg:           var(--sand);
+  --bg-white:     #ffffff;
+  --fg:           #1a1040;
+  --fg-muted:     #6B6490;
+  --border:       #E3D9F0;
+  --radius:       10px;
 }
 
 @theme inline {
   --color-background: var(--bg);
   --color-foreground: var(--fg);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-dm-sans);
+  --font-mono: var(--font-dm-sans);
 }
 
 * { box-sizing: border-box; }
@@ -28,108 +38,77 @@
 body {
   background: var(--bg);
   color: var(--fg);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
 
+/* ── Buttons ── */
+.btn-violet {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--violet); color: #fff;
+  padding: 13px 34px; border-radius: 12px;
+  font-size: 1rem; font-weight: 700; cursor: pointer;
+  border: none; text-decoration: none;
+  box-shadow: 0 6px 28px rgba(76,29,149,0.32);
+  transition: background 0.15s, box-shadow 0.15s;
+}
+.btn-violet:hover { background: var(--plum); box-shadow: 0 8px 32px rgba(61,37,120,0.38); }
+.btn-violet:disabled { opacity: 0.5; cursor: not-allowed; }
+
 .btn-gold {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  background: var(--gold);
-  color: var(--gold-fg);
-  padding: 0.7rem 1.6rem;
-  border-radius: var(--radius);
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--gold); color: #fff;
+  padding: 9px 22px; border-radius: 8px;
+  font-size: 0.95rem; font-weight: 600; cursor: pointer;
+  border: none; text-decoration: none;
   transition: background 0.15s;
-  border: none;
-  text-decoration: none;
 }
 .btn-gold:hover { background: var(--gold-hover); }
 .btn-gold:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--primary);
-  color: var(--primary-fg);
-  padding: 0.7rem 1.6rem;
-  border-radius: var(--radius);
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s;
-  border: none;
-  text-decoration: none;
-}
-.btn-primary:hover { background: var(--primary-hover); }
-.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-
 .btn-outline {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  color: var(--fg);
-  padding: 0.7rem 1.6rem;
-  border-radius: var(--radius);
-  font-size: 0.95rem;
-  font-weight: 500;
-  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  background: transparent; color: var(--fg);
+  padding: 13px 34px; border-radius: 12px;
+  font-size: 1rem; font-weight: 500; cursor: pointer;
+  border: 1.5px solid var(--border); text-decoration: none;
   transition: background 0.15s;
-  border: 1.5px solid var(--border);
-  text-decoration: none;
 }
-.btn-outline:hover { background: var(--border); }
+.btn-outline:hover { background: var(--lavender); }
 
 .btn-outline-white {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  color: #fff;
-  padding: 0.7rem 1.6rem;
-  border-radius: var(--radius);
-  font-size: 0.95rem;
-  font-weight: 500;
-  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: transparent; color: rgba(255,255,255,0.8);
+  padding: 7px 16px; border-radius: 7px;
+  font-size: 0.875rem; font-weight: 500; cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.25); text-decoration: none;
   transition: background 0.15s;
-  border: 1.5px solid rgba(255,255,255,0.4);
-  text-decoration: none;
 }
 .btn-outline-white:hover { background: rgba(255,255,255,0.1); }
 
+/* ── Cards ── */
 .card {
   background: var(--bg-white);
-  border: 1.5px solid var(--border);
-  border-radius: calc(var(--radius) * 1.4);
+  border: 1px solid var(--border);
+  border-radius: 14px;
   padding: 1.5rem;
 }
 
+/* ── Inputs ── */
 .input {
-  width: 100%;
-  padding: 0.7rem 0.875rem;
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius);
-  font-size: 0.9375rem;
-  color: var(--fg);
-  background: var(--bg-white);
-  outline: none;
-  transition: border-color 0.15s;
+  width: 100%; padding: 0.7rem 0.875rem;
+  border: 1.5px solid var(--border); border-radius: var(--radius);
+  font-size: 0.9375rem; font-family: var(--font-sans);
+  color: var(--fg); background: var(--bg-white);
+  outline: none; transition: border-color 0.15s;
 }
-.input:focus { border-color: var(--primary); }
+.input:focus { border-color: var(--violet-mid); }
 .input::placeholder { color: var(--fg-muted); }
 
+/* ── Section label ── */
 .section-label {
   display: inline-block;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--gold);
-  margin-bottom: 10px;
+  font-size: 0.75rem; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--violet-mid); margin-bottom: 10px;
 }
