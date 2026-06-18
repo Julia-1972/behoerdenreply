@@ -1,24 +1,16 @@
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { dictionaries, type Lang } from "@/i18n";
 import CaseClient from "./case-client";
 import { getResultSignedUrls } from "@/lib/result-files";
 
-export default async function CasePage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function CasePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login");
-  }
+  if (!user) redirect("/login");
 
   const { data: caseData } = await supabase
     .from("cases")
@@ -26,16 +18,9 @@ export default async function CasePage({
     .eq("id", id)
     .single();
 
-  if (!caseData || caseData.user_id !== user.id) {
-    notFound();
-  }
+  if (!caseData || caseData.user_id !== user.id) notFound();
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("language")
-    .eq("id", user.id)
-    .single();
-
+  const { data: profile } = await supabase.from("profiles").select("language").eq("id", user.id).single();
   const lang: Lang = profile?.language === "de" ? "de" : "ru";
   const t = dictionaries[lang];
 
@@ -51,27 +36,31 @@ export default async function CasePage({
     .eq("case_id", id)
     .maybeSingle();
 
-  const { pdfUrl, docxUrl } = await getResultSignedUrls(
-    supabase,
-    result?.pdf_path ?? null,
-    result?.docx_path ?? null
-  );
-
-  const initialResult = result
-    ? { final_text: result.final_text, pdf_url: pdfUrl, docx_url: docxUrl }
-    : null;
+  const { pdfUrl, docxUrl } = await getResultSignedUrls(supabase, result?.pdf_path ?? null, result?.docx_path ?? null);
+  const initialResult = result ? { final_text: result.final_text, pdf_url: pdfUrl, docx_url: docxUrl } : null;
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-4 p-6">
-      <CaseClient
-        caseId={caseData.id}
-        initialStatus={caseData.status}
-        errorReason={caseData.error_reason}
-        initialMessages={messages ?? []}
-        initialResult={initialResult}
-        lang={lang}
-        t={t}
-      />
+    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "var(--bg-subtle)" }}>
+      <nav style={{ background: "var(--bg)", borderBottom: "1.5px solid var(--border)", padding: "0 2rem", height: "56px", display: "flex", alignItems: "center", gap: "1rem" }}>
+        <Link href="/dashboard" style={{ color: "var(--fg-muted)", textDecoration: "none", fontSize: "0.875rem", display: "flex", alignItems: "center", gap: "0.4rem" }}>
+          ← Dashboard
+        </Link>
+        <span style={{ color: "var(--border)" }}>|</span>
+        <span style={{ fontWeight: 700, fontSize: "1rem", color: "var(--fg)" }}>
+          Behörden<span style={{ color: "var(--primary)" }}>Reply</span>
+        </span>
+      </nav>
+      <main style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
+        <CaseClient
+          caseId={caseData.id}
+          initialStatus={caseData.status}
+          errorReason={caseData.error_reason}
+          initialMessages={messages ?? []}
+          initialResult={initialResult}
+          lang={lang}
+          t={t}
+        />
+      </main>
     </div>
   );
 }

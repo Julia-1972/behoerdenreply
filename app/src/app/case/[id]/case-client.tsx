@@ -39,40 +39,26 @@ export default function CaseClient({
   const [answer, setAnswer] = useState("");
   const [sending, setSending] = useState(false);
   const started = useRef(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   useEffect(() => {
     if (initialStatus !== "uploaded" || started.current) return;
     started.current = true;
-
     setStatus("analyzing");
 
     fetch(`/api/cases/${caseId}/analyze`, { method: "POST" })
       .then(async (res) => {
-        if (res.status === 422) {
-          setUnreadable(true);
-          setStatus("cancelled");
-          return;
-        }
-
-        if (res.status === 502) {
-          setAiError(true);
-          setStatus("cancelled");
-          return;
-        }
-
-        if (!res.ok) {
-          return;
-        }
+        if (res.status === 422) { setUnreadable(true); setStatus("cancelled"); return; }
+        if (res.status === 502) { setAiError(true); setStatus("cancelled"); return; }
+        if (!res.ok) return;
 
         const data = await res.json();
-
         if (data.status === "questioning" && data.question) {
-          setMessages([{
-            id: `local-q-${Date.now()}`,
-            role: "ai_question",
-            content: data.question,
-            created_at: new Date().toISOString(),
-          }]);
+          setMessages([{ id: `local-q-${Date.now()}`, role: "ai_question", content: data.question, created_at: new Date().toISOString() }]);
           setStatus("questioning");
         } else {
           router.refresh();
@@ -84,16 +70,9 @@ export default function CaseClient({
   async function submitAnswer() {
     const trimmed = answer.trim();
     if (!trimmed || sending) return;
-
     setSending(true);
 
-    const optimisticQuestion: InitialMessage = {
-      id: `local-${Date.now()}`,
-      role: "user_answer",
-      content: trimmed,
-      created_at: new Date().toISOString(),
-    };
-    setMessages((prev) => [...prev, optimisticQuestion]);
+    setMessages((prev) => [...prev, { id: `local-${Date.now()}`, role: "user_answer", content: trimmed, created_at: new Date().toISOString() }]);
     setAnswer("");
 
     try {
@@ -103,143 +82,142 @@ export default function CaseClient({
         body: JSON.stringify({ answer: trimmed }),
       });
 
-      if (res.status === 502) {
-        setAiError(true);
-        setStatus("cancelled");
-        return;
-      }
-
+      if (res.status === 502) { setAiError(true); setStatus("cancelled"); return; }
       if (!res.ok) return;
 
       const data = await res.json();
-
       if (data.status === "done") {
-        setResult({
-          final_text: data.final_text,
-          pdf_url: data.pdf_url ?? null,
-          docx_url: data.docx_url ?? null,
-        });
+        setResult({ final_text: data.final_text, pdf_url: data.pdf_url ?? null, docx_url: data.docx_url ?? null });
         setStatus("done");
       } else if (data.status === "questioning" && data.question) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: `local-q-${Date.now()}`,
-            role: "ai_question",
-            content: data.question,
-            created_at: new Date().toISOString(),
-          },
-        ]);
+        setMessages((prev) => [...prev, { id: `local-q-${Date.now()}`, role: "ai_question", content: data.question, created_at: new Date().toISOString() }]);
       }
     } finally {
       setSending(false);
     }
   }
 
-  if (aiError) {
+  // Error states
+  if (aiError || unreadable) {
     return (
-      <div className="flex flex-col items-center gap-3 text-center">
-        <h1 className="text-lg font-semibold">{t.aiErrorTitle}</h1>
-        <p className="max-w-sm text-sm text-gray-600">{t.aiErrorText}</p>
-        <Link href="/dashboard" className="rounded bg-black px-4 py-2 text-white">
-          {t.backToDashboard}
-        </Link>
+      <div className="card" style={{ maxWidth: "480px", width: "100%", textAlign: "center", padding: "2.5rem 2rem" }}>
+        <div style={{ fontSize: "2rem", marginBottom: "1rem" }}>{aiError ? "⚠️" : "📄"}</div>
+        <h1 style={{ fontSize: "1.2rem", fontWeight: 700, marginBottom: "0.5rem" }}>
+          {aiError ? t.aiErrorTitle : t.unreadableTitle}
+        </h1>
+        <p style={{ color: "var(--fg-muted)", fontSize: "0.9rem", marginBottom: "1.5rem" }}>
+          {aiError ? t.aiErrorText : t.unreadableText}
+        </p>
+        <Link href="/dashboard" className="btn-primary">{t.backToDashboard}</Link>
       </div>
     );
   }
 
-  if (unreadable) {
-    return (
-      <div className="flex flex-col items-center gap-3 text-center">
-        <h1 className="text-lg font-semibold">{t.unreadableTitle}</h1>
-        <p className="max-w-sm text-sm text-gray-600">{t.unreadableText}</p>
-        <Link href="/dashboard" className="rounded bg-black px-4 py-2 text-white">
-          {t.backToDashboard}
-        </Link>
-      </div>
-    );
-  }
-
+  // Analyzing
   if (status === "uploaded" || status === "analyzing") {
     return (
-      <div className="flex flex-col items-center gap-3 text-center">
-        <p className="text-sm text-gray-600">{t.analyzing}</p>
+      <div style={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem" }}>
+        <div style={{ width: "48px", height: "48px", border: "3px solid var(--border)", borderTop: "3px solid var(--primary)", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+        <p style={{ color: "var(--fg-muted)", fontSize: "0.95rem" }}>{t.analyzing}</p>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
 
+  // Done
   if (status === "done" && result) {
     return (
-      <div className="flex w-full max-w-xl flex-col gap-4">
-        <h1 className="text-lg font-semibold">{t.finalTitle}</h1>
-        <p className="text-sm text-gray-600">{t.finalIntro}</p>
-        <pre className="whitespace-pre-wrap rounded border bg-gray-50 p-4 text-sm">
-          {result.final_text}
-        </pre>
-        <div className="flex gap-3">
+      <div style={{ width: "100%", maxWidth: "640px", display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+          <div style={{ background: "#dcfce7", color: "#16a34a", borderRadius: "50%", width: "2rem", height: "2rem", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: "1rem" }}>✓</div>
+          <h1 style={{ fontSize: "1.25rem", fontWeight: 700 }}>{t.finalTitle}</h1>
+        </div>
+        <p style={{ color: "var(--fg-muted)", fontSize: "0.9rem" }}>{t.finalIntro}</p>
+        <div className="card" style={{ background: "var(--bg)" }}>
+          <pre style={{ whiteSpace: "pre-wrap", fontFamily: "inherit", fontSize: "0.875rem", lineHeight: 1.7, margin: 0 }}>
+            {result.final_text}
+          </pre>
+        </div>
+        <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
           {result.pdf_url && (
-            <a
-              href={result.pdf_url}
-              className="rounded bg-black px-4 py-2 text-sm text-white"
-            >
-              {t.downloadPdf}
-            </a>
+            <a href={result.pdf_url} className="btn-primary" style={{ fontSize: "0.875rem" }}>{t.downloadPdf}</a>
           )}
           {result.docx_url && (
-            <a
-              href={result.docx_url}
-              className="rounded bg-black px-4 py-2 text-sm text-white"
-            >
-              {t.downloadDocx}
-            </a>
+            <a href={result.docx_url} className="btn-outline" style={{ fontSize: "0.875rem" }}>{t.downloadDocx}</a>
           )}
         </div>
-        <Link href="/dashboard" className="text-sm text-gray-600 underline">
-          {t.backToDashboard}
-        </Link>
+        <Link href="/dashboard" style={{ color: "var(--fg-muted)", fontSize: "0.875rem", textDecoration: "underline" }}>{t.backToDashboard}</Link>
       </div>
     );
   }
 
+  // Questioning
   if (status === "questioning") {
-    const lastQuestion = [...messages]
-      .reverse()
-      .find((m) => m.role === "ai_question");
+    const lastQuestion = [...messages].reverse().find((m) => m.role === "ai_question");
 
     return (
-      <div className="flex w-full max-w-xl flex-col gap-4">
-        <div className="flex flex-col gap-3">
+      <div style={{ width: "100%", maxWidth: "640px", display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+        <h2 style={{ fontSize: "1.1rem", fontWeight: 700, color: "var(--fg)" }}>Rückfragen zur Analyse</h2>
+
+        {/* Chat messages */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
           {messages.map((m) => (
-            <div
-              key={m.id}
-              className={
-                m.role === "ai_question"
-                  ? "rounded bg-gray-100 p-3 text-sm"
-                  : "rounded bg-black p-3 text-sm text-white self-end"
-              }
-            >
-              {m.content}
+            <div key={m.id} style={{
+              display: "flex",
+              justifyContent: m.role === "user_answer" ? "flex-end" : "flex-start",
+            }}>
+              <div style={{
+                maxWidth: "85%",
+                padding: "0.75rem 1rem",
+                borderRadius: m.role === "ai_question" ? "4px 14px 14px 14px" : "14px 4px 14px 14px",
+                background: m.role === "ai_question" ? "var(--bg)" : "var(--primary)",
+                color: m.role === "ai_question" ? "var(--fg)" : "#fff",
+                fontSize: "0.9rem",
+                lineHeight: 1.6,
+                border: m.role === "ai_question" ? "1.5px solid var(--border)" : "none",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+              }}>
+                {m.content}
+              </div>
             </div>
           ))}
+          <div ref={bottomRef} />
         </div>
 
+        {/* Input */}
         {lastQuestion && (
-          <div className="flex flex-col gap-2">
+          <div className="card" style={{ padding: "1rem", display: "flex", flexDirection: "column", gap: "0.75rem" }}>
             <textarea
-              className="w-full rounded border p-2 text-sm"
+              style={{
+                width: "100%",
+                padding: "0.625rem 0.875rem",
+                border: "1.5px solid var(--border)",
+                borderRadius: "10px",
+                fontSize: "0.9rem",
+                fontFamily: "inherit",
+                lineHeight: 1.6,
+                resize: "vertical",
+                outline: "none",
+                minHeight: "80px",
+                color: "var(--fg)",
+              }}
               rows={3}
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submitAnswer(); } }}
               placeholder={t.answerPlaceholder}
               disabled={sending}
             />
-            <button
-              onClick={submitAnswer}
-              disabled={sending || !answer.trim()}
-              className="self-end rounded bg-black px-4 py-2 text-sm text-white disabled:opacity-50"
-            >
-              {sending ? t.answerSending : t.answerButton}
-            </button>
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+              <button
+                onClick={submitAnswer}
+                disabled={sending || !answer.trim()}
+                className="btn-primary"
+                style={{ fontSize: "0.875rem" }}
+              >
+                {sending ? t.answerSending : t.answerButton}
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -247,8 +225,6 @@ export default function CaseClient({
   }
 
   return (
-    <div className="flex flex-col items-center gap-3 text-center">
-      <p className="text-sm text-gray-600">Status: {status}</p>
-    </div>
+    <div style={{ color: "var(--fg-muted)", fontSize: "0.9rem" }}>Status: {status}</div>
   );
 }
