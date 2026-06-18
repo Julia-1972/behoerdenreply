@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const pdfParse = require("pdf-parse/lib/pdf-parse.js");
-import { getOpenAI } from "./openai";
+import { openai } from "./openai";
 
 export async function extractPdfText(buffer: Buffer): Promise<string> {
   const result = await pdfParse(buffer);
@@ -8,7 +8,6 @@ export async function extractPdfText(buffer: Buffer): Promise<string> {
 }
 
 export async function extractPdfTextOcr(buffer: Buffer): Promise<string> {
-  const openai = getOpenAI();
 
   const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength) as ArrayBuffer;
   const uploadedFile = await openai.files.create({
