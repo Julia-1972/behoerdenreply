@@ -1,7 +1,5 @@
 import React from "react";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { createSupabaseServerClient } from "@/lib/supabase-server";
 
 const NAV: React.CSSProperties = {
   background: "linear-gradient(90deg, #1E1133 0%, #261245 55%, #1E1133 100%)",
@@ -19,11 +17,7 @@ function NavLogo() {
   );
 }
 
-export default async function Home() {
-  const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (user) redirect("/dashboard");
-
+export default function Home() {
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "var(--sand)" }}>
 
