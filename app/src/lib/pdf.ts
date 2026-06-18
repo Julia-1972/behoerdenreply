@@ -33,7 +33,7 @@ export async function extractPdfTextOcr(buffer: Buffer): Promise<string> {
           { type: "input_file", file_id: uploadedFile.id },
           {
             type: "input_text",
-            text: "Extrahiere den vollstaendigen Text aus diesem Dokument Wort fuer Wort. Gib nur den reinen Text aus, keine Kommentare oder Erklaerungen.",
+            text: "Dies ist ein offizielles Schreiben einer deutschen Behoerde. Beschreibe vollstaendig: 1) Von welcher Behoerde stammt das Schreiben? 2) Was wird gefordert oder mitgeteilt? 3) Welche Fristen oder Daten werden genannt? 4) Welche Betraege, Aktenzeichen oder Paragraphen? 5) Welcher Name und Adresse des Empfaengers? Sei so detailliert wie moeglich, sodass jemand ohne Zugriff auf das Original vollstaendig informiert ist.",
           },
         ],
       }],
