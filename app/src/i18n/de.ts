@@ -118,7 +118,7 @@ export const de = {
   priceSubFeat2: "Fertig formuliertes Antwortschreiben",
   priceSubFeat3: "Download als PDF und DOCX",
 
-  ctaTitle: "Kein Brief ohne Antwort.\nWir sind dabei.",
+  ctaTitle: "Kein Brief bleibt unbeantwortet.\nWir sind für Sie da!",
   ctaText: "Laden Sie Ihr Schreiben hoch — in wenigen Minuten haben Sie eine vollständige, korrekte Antwort in der Hand.",
   ctaButton: "Starten",
 };
