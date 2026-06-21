@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient, createSupabaseAdminClient } from "@/lib/supabase-server";
 import { extractPdfText, extractPdfTextOcr, isReadableText } from "@/lib/pdf";
-import { extractBriefkopfFromText, prependBriefkopf } from "@/lib/briefkopf";
+import { extractBriefkopfFromText, extractBriefkopfWithAI, prependBriefkopf } from "@/lib/briefkopf";
 import { createAssistant, createThreadWithPdf, preAnalyzeLetter, buildAdditionalInstructions, runAndGetResponse, extractFinalLetter } from "@/lib/assistant";
 import { uploadResultFiles } from "@/lib/result-files";
 
@@ -71,21 +71,31 @@ export async function POST(
     return NextResponse.json({ error: "unreadable" }, { status: 422 });
   }
 
-  // Extract Briefkopf from PDF text (server-side, no AI needed)
-  const bkData = extractBriefkopfFromText(text);
-  const analysisSummary = "BRIEFKOPF_JSON:" + JSON.stringify(bkData);
+  // Extract Briefkopf (regex first) and start AI tasks in parallel
+  let bkData = extractBriefkopfFromText(text);
+  const needAiBriefkopf = !bkData.nutzerName && !bkData.behördeName;
 
-  // Create OpenAI Assistant + Thread
   let assistantId: string;
   let threadId: string;
   let response: string;
-
   let preAnalysisText = "";
+
   try {
-    [preAnalysisText, assistantId] = await Promise.all([
+    // Run all independent AI calls in parallel
+    const [preAnalysis, asstId, aiBriefkopf] = await Promise.all([
       preAnalyzeLetter(text),
       createAssistant(),
-    ]);
+      needAiBriefkopf ? extractBriefkopfWithAI(text) : Promise.resolve(null),
+    ] as const);
+
+    preAnalysisText = preAnalysis;
+    assistantId = asstId;
+
+    if (aiBriefkopf) {
+      bkData = aiBriefkopf;
+      console.log("[analyze] AI briefkopf:", JSON.stringify(bkData));
+    }
+
     const additionalInstructions = buildAdditionalInstructions(preAnalysisText, true);
     threadId = await createThreadWithPdf(text, bkData.nutzerName || undefined);
     response = await runAndGetResponse(threadId, assistantId, additionalInstructions);
@@ -94,6 +104,8 @@ export async function POST(
     await supabase.from("cases").update({ status: "cancelled", error_reason: "ai_error" }).eq("id", id);
     return NextResponse.json({ error: "ai_error" }, { status: 502 });
   }
+
+  const analysisSummary = "BRIEFKOPF_JSON:" + JSON.stringify(bkData);
 
   // Save thread_id, analysis_summary and pre-analysis for debugging
   await supabase.from("cases").update({

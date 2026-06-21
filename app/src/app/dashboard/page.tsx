@@ -5,6 +5,8 @@ import { dictionaries, type Lang } from "@/i18n";
 import LogoutButton from "./logout-button";
 import UploadForm from "./upload-form";
 import UpgradeScreen from "./upgrade-screen";
+import LangSwitcher from "../components/lang-switcher";
+import BackButton from "../components/back-button";
 
 export default async function DashboardPage() {
   const supabase = await createSupabaseServerClient();
@@ -37,16 +39,20 @@ export default async function DashboardPage() {
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "var(--bg)" }}>
       <nav style={{ background: "linear-gradient(90deg, #1E1133 0%, #261245 55%, #1E1133 100%)", padding: "0 2.5rem", height: "72px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 100, boxShadow: "0 8px 32px rgba(30,17,51,0.28)" }}>
-        <Link href="/" style={{ fontWeight: 800, fontSize: "1.2rem", color: "#fff", textDecoration: "none" }}>
-          Behörden<span style={{ color: "var(--gold)" }}>Reply</span>
-        </Link>
         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          <BackButton label={t.navBack} href="/" />
+          <Link href="/" style={{ fontWeight: 800, fontSize: "1.2rem", color: "#fff", textDecoration: "none" }}>
+            Behörden<span style={{ color: "var(--gold)" }}>Reply</span>
+          </Link>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          <LangSwitcher current={lang} />
           <span style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.6)" }}>{user.email}</span>
-          <LogoutButton />
+          <LogoutButton label={t.navLogout} />
         </div>
       </nav>
 
-      <main style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "3rem 2rem" }}>
+      <main style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem", overflowY: "auto" }}>
         {activeCase ? (
           <div style={{ background: "var(--bg-white)", borderRadius: "18px", padding: "2.5rem 2rem", maxWidth: "480px", width: "100%", textAlign: "center", boxShadow: "0 8px 40px rgba(30,18,69,0.08)", border: "1.5px solid var(--border)" }}>
             <div style={{ fontSize: "2rem", marginBottom: "1rem" }}>📋</div>

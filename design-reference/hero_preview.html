@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hero Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: #FAF6F0; -webkit-font-smoothing: antialiased; }
+:root {
+  --violet: #4C1D95; --violet-mid: #6B46C1; --violet-light: #7B5EA7;
+  --violet-pale: #C4B5FD; --violet-frost: #F5F0FF; --lavender: #EDE7F6;
+  --sand: #FAF6F0; --plum: #3D2578; --white: #ffffff;
+}
+nav {
+  background: linear-gradient(90deg, #1E1133 0%, #261245 55%, #1E1133 100%);
+  height: 78px; padding: 0 42px;
+  display: flex; align-items: center; gap: 12px;
+  box-shadow: 0 8px 32px rgba(30,17,51,0.28);
+}
+.nav-brand { display: flex; align-items: center; gap: 12px; }
+.nav-ogo { font-family: 'DM Serif Display', serif; font-size: 48px; color: #D4BBFF; letter-spacing: -0.03em; line-height: 1; }
+.nav-sep { width: 1px; height: 56px; background: rgba(169,139,255,0.4); flex-shrink: 0; }
+.nav-text { display: flex; flex-direction: column; gap: 4px; }
+.nav-site { font-family: 'Libre Baskerville', serif; font-size: 25px; color: #A98BFF; letter-spacing: 0.02em; line-height: 1; }
+.nav-site .go { color: #D4BBFF; font-weight: 700; }
+.nav-tagline { font-size: 11px; color: rgba(255,255,255,0.48); letter-spacing: 0.28em; }
+.nav-tagline .go { color: #D99A45; }
+.nav-links { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+.nav-links a, .nav-lang { font-size: 16px; font-weight: 500; color: rgba(255,255,255,0.78); text-decoration: none; padding: 7px 11px; border-radius: 6px; cursor: pointer; }
+.nav-cabinet { font-size: 16px; font-weight: 600; color: #FFFFFF; background: #D99A45; border: none; border-radius: 8px; padding: 9px 20px; cursor: pointer; }
+.hero {
+  background: linear-gradient(90deg, #FFF9F2 0%, #FAF6F0 42%, #F4E9DA 100%);
+  position: relative; display: grid; grid-template-columns: 48fr 52fr;
+  height: calc(100vh - 78px); min-height: 560px; overflow: hidden;
+}
+.hero-left-wrap { padding: 40px 16px 40px 42px; display: flex; align-items: center; }
+.hero-left-frame { background: transparent; border: none; padding: 0; display: flex; flex-direction: column; justify-content: center; width: 100%; }
+.hero-badge { display: inline-flex; align-items: center; gap: 8px; background: var(--lavender); border: 1px solid var(--violet-pale); border-radius: 6px; padding: 5px 14px; margin-bottom: 10px; width: fit-content; }
+.hero-badge-dot { width: 7px; height: 7px; background: var(--violet-mid); border-radius: 50%; }
+.hero-badge span { font-size: 13px; font-weight: 600; color: var(--violet); letter-spacing: 0.1em; text-transform: uppercase; }
+.hero-slogan { font-family: 'DM Serif Display', serif; font-weight: 400; color: var(--violet); line-height: 1; margin-bottom: 8px; }
+.hero-slogan-prefix { display: block; font-family: 'DM Sans', sans-serif; font-size: 28px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; color: var(--violet-light); margin-bottom: -2px; }
+.hero-slogan-main { display: block; font-size: 68px; letter-spacing: -1.5px; color: var(--violet); text-transform: uppercase; line-height: 0.94; }
+.hero-tagline { font-size: 18px; font-weight: 400; color: #666; margin-bottom: 12px; line-height: 1.5; max-width: 400px; }
+.hero-subheading { font-family: 'DM Serif Display', serif; font-style: normal; font-size: 22px; font-weight: 400; color: #444; line-height: 1.45; letter-spacing: -0.1px; margin-bottom: 16px; margin-top: 4px; border-left: 3px solid var(--violet-pale); padding-left: 16px; }
+.hero-services { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+.hero-service-item { display: flex; align-items: center; gap: 10px; font-size: 13.5px; color: #333; line-height: 1.3; padding: 10px 14px; background: #F6F1FB; border-radius: 10px; border: 1px solid rgba(123,94,167,0.15); box-shadow: 0 2px 8px rgba(61,37,120,0.05); }
+.hero-service-icon { width: 24px; height: 24px; min-width: 24px; background: var(--violet); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: var(--white); flex-shrink: 0; }
+.hero-service-item strong { color: var(--plum); font-weight: 700; }
+.hero-btn { display: inline-flex; align-items: center; gap: 10px; background: #4C1D95; color: #FFFFFF; border: none; border-radius: 12px; padding: 14px 36px; font-family: 'DM Sans', sans-serif; font-size: 18px; font-weight: 700; cursor: pointer; margin-bottom: 12px; align-self: flex-start; box-shadow: 0 6px 28px rgba(76,29,149,0.32); }
+.hero-price-note { font-size: 12px; font-weight: 400; color: #999; margin-bottom: 10px; }
+.hero-trust { display: flex; flex-direction: row; gap: 20px; flex-wrap: wrap; }
+.hero-trust-item { display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 500; color: #555; }
+.hero-trust-check { font-size: 10px; color: var(--violet-mid); font-weight: 700; }
+.hero-right { position: relative; overflow: hidden; }
+.hero-right img { width: 100%; height: 100%; object-fit: cover; object-position: 90% 20%; display: block; filter: brightness(0.87) saturate(0.78); }
+.hero-right::before { content: ''; position: absolute; inset: 0; background: linear-gradient(to right, #FAF6F0 0%, rgba(250,246,240,0.6) 22%, rgba(250,246,240,0.15) 38%, transparent 55%); z-index: 1; pointer-events: none; }
+.hero-right::after { content: ''; position: absolute; inset: 0; background: rgba(248,238,218,0.12); z-index: 1; pointer-events: none; }
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-brand">
+    <span class="nav-ogo">ОГО!</span>
+    <div class="nav-sep"></div>
+    <div class="nav-text">
+      <span class="nav-site"><span class="go">O</span>tvet<span class="go">GO</span>tov.de</span>
+      <span class="nav-tagline"><span class="go">О</span>твет <span class="go">Г</span>отов <span class="go">О</span>нлайн</span>
+    </div>
+  </div>
+  <div class="nav-sep"></div>
+  <svg width="54" height="54" viewBox="0 0 42 42" fill="none"><rect x="4" y="10" width="34" height="24" rx="3" stroke="#D99A45" stroke-width="2"/><polyline points="4,10 21,24 38,10" stroke="#D99A45" stroke-width="2" fill="none"/><polyline points="26,27 30,31 38,22" stroke="#A98BFF" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <div class="nav-links">
+    <a href="#">Как это работает</a>
+    <a href="#">Цены</a>
+    <a href="#">FAQ</a>
+    <a href="#">Контакт</a>
+    <span class="nav-lang">Языки ▾</span>
+    <button class="nav-cabinet">Личный кабинет</button>
+  </div>
+</nav>
+<div class="hero">
+  <div class="hero-left-wrap">
+    <div class="hero-left-frame">
+      <div class="hero-badge">
+        <div class="hero-badge-dot"></div>
+        <span>Ответ Готов Онлайн</span>
+      </div>
+      <h1 class="hero-slogan"><span class="hero-slogan-prefix">Мы продаём</span><span class="hero-slogan-main">спокойствие!</span></h1>
+      <p class="hero-subheading">Пришло письмо из немецкого учреждения?<br>Немецкая бюрократия больше не должна быть источником стресса и тревоги.</p>
+      <div class="hero-services">
+        <div class="hero-service-item"><span class="hero-service-icon">1</span><span>Загрузите письмо или переписку</span></div>
+        <div class="hero-service-item"><span class="hero-service-icon">2</span><span>Мы объясним ситуацию<br><strong>на русском</strong></span></div>
+        <div class="hero-service-item"><span class="hero-service-icon">3</span><span>Подготовим ответ <strong>на немецком</strong></span></div>
+      </div>
+      <button class="hero-btn">Перейти к загрузке <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"></path></svg></button>
+      <p class="hero-price-note">Анализ от 9,99 €</p>
+      <div class="hero-trust">
+        <div class="hero-trust-item"><span class="hero-trust-check">✓</span> Без скрытых платежей</div>
+        <div class="hero-trust-item"><span class="hero-trust-check">✓</span> Данные защищены (DSGVO)</div>
+        <div class="hero-trust-item"><span class="hero-trust-check">✓</span> Два варианта ответа на выбор</div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-right">
+    <img src="Hero_new_26.05.26.png" alt="Немецкие официальные письма на рабочем столе">
+  </div>
+</div>
+</body></html>

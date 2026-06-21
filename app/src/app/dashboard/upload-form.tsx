@@ -27,6 +27,7 @@ export default function UploadForm({ lang }: { lang: Lang }) {
     if (!res.ok) {
       const data = await res.json().catch(() => null);
       if (res.status === 409 && data?.caseId) { router.push(`/case/${data.caseId}`); return; }
+      if (res.status === 402) { setError(t.upgradeFreeUsed); setUploading(false); setTimeout(() => router.refresh(), 2000); return; }
       setError(t.error);
       setUploading(false);
       return;
@@ -68,16 +69,12 @@ export default function UploadForm({ lang }: { lang: Lang }) {
       >
         <div style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}>📄</div>
         <div style={{ fontWeight: 700, marginBottom: "0.4rem", color: "var(--fg)" }}>
-          {uploading ? t.uploading : "PDF hier ablegen oder auswählen"}
+          {uploading ? t.uploading : t.uploadDropzone}
         </div>
         <div style={{ color: "var(--fg-muted)", fontSize: "0.875rem" }}>
           {uploading ? "..." : t.uploadHint}
         </div>
       </div>
-
-      <button type="button" onClick={() => inputRef.current?.click()} disabled={uploading} className="btn-gold" style={{ width: "100%" }}>
-        {uploading ? t.uploading : "✉ PDF auswählen und analysieren"}
-      </button>
 
       {error && (
         <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: "8px", padding: "0.625rem 0.875rem", fontSize: "0.875rem", color: "#dc2626" }}>

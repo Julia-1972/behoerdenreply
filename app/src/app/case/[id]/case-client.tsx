@@ -9,6 +9,34 @@ import type { Dictionary, Lang } from "@/i18n";
 type InitialMessage = Pick<CaseMessage, "id" | "role" | "content" | "created_at">;
 type InitialResult = { final_text: CaseResult["final_text"]; pdf_url: string | null; docx_url: string | null } | null;
 
+function DownloadButton({ url, label, className, style }: { url: string; label: string; className: string; style?: React.CSSProperties }) {
+  async function handleClick() {
+    const res = await fetch(url);
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = blobUrl;
+    a.download = label.includes("PDF") ? "antwort.pdf" : "antwort.docx";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(blobUrl);
+  }
+  return <button onClick={handleClick} className={className} style={style}>{label}</button>;
+}
+
+function InfoCard({ icon, title, text, color }: { icon: string; title: string; text: string; color: string }) {
+  return (
+    <div style={{ background: color === "blue" ? "#eff6ff" : "#fef3c7", border: `1.5px solid ${color === "blue" ? "#bfdbfe" : "#fcd34d"}`, borderRadius: "14px", padding: "1rem 1.25rem", display: "flex", gap: "0.75rem", alignItems: "flex-start" }}>
+      <div style={{ fontSize: "1.3rem", flexShrink: 0 }}>{icon}</div>
+      <div>
+        <div style={{ fontWeight: 700, fontSize: "0.9rem", marginBottom: "0.25rem", color: color === "blue" ? "#1e40af" : "#92400e" }}>{title}</div>
+        <div style={{ fontSize: "0.85rem", lineHeight: 1.5, color: color === "blue" ? "#1e40af" : "#92400e" }}>{text}</div>
+      </div>
+    </div>
+  );
+}
+
 export default function CaseClient({ caseId, initialStatus, errorReason, initialMessages, initialResult, lang, t }: {
   caseId: string; initialStatus: CaseStatus; errorReason: string | null;
   initialMessages: InitialMessage[]; initialResult: InitialResult; lang: Lang; t: Dictionary;
@@ -21,10 +49,14 @@ export default function CaseClient({ caseId, initialStatus, errorReason, initial
   const [result, setResult] = useState<InitialResult>(initialResult);
   const [answer, setAnswer] = useState("");
   const [sending, setSending] = useState(false);
+  const [showWarning, setShowWarning] = useState(false);
+  const confirmedRef = useRef(false);
   const started = useRef(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+  const userAnswerCount = messages.filter(m => m.role === "user_answer").length;
+
+  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, showWarning]);
 
   useEffect(() => {
     if (initialStatus !== "uploaded" || started.current) return;
@@ -47,6 +79,16 @@ export default function CaseClient({ caseId, initialStatus, errorReason, initial
   async function submitAnswer() {
     const trimmed = answer.trim();
     if (!trimmed || sending) return;
+
+    if (userAnswerCount >= 1 && !confirmedRef.current) {
+      // After first answer, show warning before sending another
+      setShowWarning(true);
+      return;
+    }
+    // Note: with maximal 1 question in prompt, this warning rarely triggers
+    // but serves as safety net if AI asks follow-up despite instructions
+
+    setShowWarning(false);
     setSending(true);
     setMessages((prev) => [...prev, { id: `local-${Date.now()}`, role: "user_answer", content: trimmed, created_at: new Date().toISOString() }]);
     setAnswer("");
@@ -64,7 +106,18 @@ export default function CaseClient({ caseId, initialStatus, errorReason, initial
       } else if (data.status === "questioning" && data.question) {
         setMessages((prev) => [...prev, { id: `local-q-${Date.now()}`, role: "ai_question", content: data.question, created_at: new Date().toISOString() }]);
       }
-    } finally { setSending(false); }
+    } finally { setSending(false); confirmedRef.current = false; }
+  }
+
+  function handleForceGenerate() {
+    confirmedRef.current = true;
+    setShowWarning(false);
+    submitAnswer();
+  }
+
+  function handleRetryQuestions() {
+    setShowWarning(false);
+    setAnswer("");
   }
 
   if (aiError || unreadable) {
@@ -102,8 +155,8 @@ export default function CaseClient({ caseId, initialStatus, errorReason, initial
           </pre>
         </div>
         <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
-          {result.pdf_url && <a href={result.pdf_url} className="btn-gold" style={{ fontSize: "0.875rem" }}>{t.downloadPdf}</a>}
-          {result.docx_url && <a href={result.docx_url} className="btn-outline" style={{ fontSize: "0.875rem" }}>{t.downloadDocx}</a>}
+          {result.pdf_url && <DownloadButton url={result.pdf_url} label={t.downloadPdf} className="btn-gold" style={{ fontSize: "0.875rem" }} />}
+          {result.docx_url && <DownloadButton url={result.docx_url} label={t.downloadDocx} className="btn-outline" style={{ fontSize: "0.875rem" }} />}
         </div>
         <Link href="/dashboard" style={{ color: "var(--fg-muted)", fontSize: "0.875rem", textDecoration: "underline" }}>{t.backToDashboard}</Link>
       </div>
@@ -114,14 +167,19 @@ export default function CaseClient({ caseId, initialStatus, errorReason, initial
     const lastQuestion = [...messages].reverse().find((m) => m.role === "ai_question");
     return (
       <div style={{ width: "100%", maxWidth: "680px", display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-        <h2 style={{ fontSize: "1.1rem", fontWeight: 800, color: "var(--fg)" }}>Rückfragen zur Analyse</h2>
+        <h2 style={{ fontSize: "1.1rem", fontWeight: 800, color: "var(--fg)" }}>{t.questioningTitle}</h2>
+
+        {userAnswerCount === 0 && (
+          <InfoCard icon="ℹ️" title={t.qaInfoTitle} text={t.qaInfoText} color="blue" />
+        )}
+
         <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
           {messages.map((m) => (
             <div key={m.id} style={{ display: "flex", justifyContent: m.role === "user_answer" ? "flex-end" : "flex-start" }}>
               <div style={{
                 maxWidth: "85%", padding: "0.875rem 1.1rem",
                 borderRadius: m.role === "ai_question" ? "4px 16px 16px 16px" : "16px 4px 16px 16px",
-                background: m.role === "ai_question" ? "var(--bg-white)" : "var(--bg-dark)",
+                background: m.role === "ai_question" ? "var(--bg-white)" : "var(--violet)",
                 color: m.role === "ai_question" ? "var(--fg)" : "#fff",
                 fontSize: "0.9rem", lineHeight: 1.6,
                 border: m.role === "ai_question" ? "1.5px solid var(--border)" : "none",
@@ -133,10 +191,23 @@ export default function CaseClient({ caseId, initialStatus, errorReason, initial
           ))}
           <div ref={bottomRef} />
         </div>
-        {lastQuestion && (
+
+        {showWarning ? (
+          <div style={{ background: "var(--bg-white)", borderRadius: "14px", padding: "1.25rem", border: "1.5px solid var(--border)", display: "flex", flexDirection: "column", gap: "1rem" }}>
+            <InfoCard icon="⚠️" title={t.qaWarningTitle} text={t.qaWarningText} color="amber" />
+            <div style={{ display: "flex", gap: "0.75rem" }}>
+              <button onClick={handleForceGenerate} disabled={sending} className="btn-gold" style={{ flex: 1, fontSize: "0.875rem" }}>
+                {sending ? t.answerSending : t.qaGenerate}
+              </button>
+              <button onClick={handleRetryQuestions} disabled={sending} className="btn-outline" style={{ flex: 1, fontSize: "0.875rem" }}>
+                {t.qaRetry}
+              </button>
+            </div>
+          </div>
+        ) : lastQuestion && (
           <div style={{ background: "var(--bg-white)", borderRadius: "14px", padding: "1rem", border: "1.5px solid var(--border)", display: "flex", flexDirection: "column", gap: "0.75rem" }}>
             <textarea
-              style={{ width: "100%", padding: "0.7rem 0.875rem", border: "1.5px solid var(--border)", borderRadius: "10px", fontSize: "0.9rem", fontFamily: "inherit", lineHeight: 1.6, resize: "vertical", outline: "none", minHeight: "80px", color: "var(--fg)", background: "var(--bg)" }}
+              style={{ width: "100%", padding: "0.7rem 0.875rem", border: "1.5px solid var(--border)", borderRadius: "10px", fontSize: "0.9rem", fontFamily: "inherit", lineHeight: 1.6, resize: "vertical", outline: "none", minHeight: "80px", color: "var(--fg)", background: "var(--bg-white)" }}
               rows={3} value={answer}
               onChange={(e) => setAnswer(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submitAnswer(); } }}

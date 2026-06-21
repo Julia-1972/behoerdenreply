@@ -4,6 +4,8 @@ import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { dictionaries, type Lang } from "@/i18n";
 import CaseClient from "./case-client";
 import { getResultSignedUrls } from "@/lib/result-files";
+import LangSwitcher from "../../components/lang-switcher";
+import BackButton from "../../components/back-button";
 
 export default async function CasePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -30,14 +32,14 @@ export default async function CasePage({ params }: { params: Promise<{ id: strin
 
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "var(--bg)" }}>
-      <nav style={{ background: "linear-gradient(90deg, #1E1133 0%, #261245 55%, #1E1133 100%)", padding: "0 2.5rem", height: "72px", display: "flex", alignItems: "center", gap: "1rem", position: "sticky", top: 0, zIndex: 100, boxShadow: "0 8px 32px rgba(30,17,51,0.28)" }}>
-        <Link href="/dashboard" style={{ color: "rgba(255,255,255,0.6)", textDecoration: "none", fontSize: "0.875rem", display: "flex", alignItems: "center", gap: "0.4rem" }}>
-          ← Dashboard
-        </Link>
-        <span style={{ color: "rgba(255,255,255,0.2)" }}>|</span>
-        <span style={{ fontWeight: 800, fontSize: "1.1rem", color: "#fff" }}>
-          Behörden<span style={{ color: "var(--gold)" }}>Reply</span>
-        </span>
+      <nav style={{ background: "linear-gradient(90deg, #1E1133 0%, #261245 55%, #1E1133 100%)", padding: "0 2.5rem", height: "72px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 100, boxShadow: "0 8px 32px rgba(30,17,51,0.28)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          <BackButton label={t.navBack} href="/dashboard" />
+          <span style={{ fontWeight: 800, fontSize: "1.1rem", color: "#fff" }}>
+            Behörden<span style={{ color: "var(--gold)" }}>Reply</span>
+          </span>
+        </div>
+        <LangSwitcher current={lang} />
       </nav>
       <main style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
         <CaseClient

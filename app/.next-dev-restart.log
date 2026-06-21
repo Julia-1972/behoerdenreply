@@ -76,3 +76,7 @@ die für die abschließende Bearbeitung Ihres Falls erforderlich sind:
  POST /api/cases/7cd61070-2fb6-4af4-9fc5-44b15a5c492f/analyze 200 in 7.0s (next.js: 21ms, proxy.ts: 53ms, application-code: 7.0s)
  GET /case/7cd61070-2fb6-4af4-9fc5-44b15a5c492f 200 in 539ms (next.js: 22ms, proxy.ts: 54ms, application-code: 462ms)
  GET /dashboard 200 in 299ms (next.js: 7ms, proxy.ts: 55ms, application-code: 236ms)
+✓ Compiled in 497ms
+✓ Compiled in 70ms
+✓ Compiled in 62ms
+✓ Compiled in 44ms

@@ -1,7 +1,19 @@
 import OpenAI from "openai";
 
-export const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
+let _openai: OpenAI | null = null;
+
+export function getOpenAI(): OpenAI {
+  if (!_openai) {
+    _openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
+  }
+  return _openai;
+}
+
+// Keep named export for compatibility with qa.ts (unused in prod but still compiled)
+export const openai = new Proxy({} as OpenAI, {
+  get(_target, prop) {
+    return getOpenAI()[prop as keyof OpenAI];
+  },
 });
 
-export const AI_MODEL = "gpt-4.1-mini";
+export const AI_MODEL = "gpt-4o";

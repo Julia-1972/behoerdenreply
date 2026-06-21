@@ -1,75 +1,99 @@
-import React from "react";
+"use client";
+
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { dictionaries, type Lang } from "@/i18n";
 
 const NAV: React.CSSProperties = {
   background: "linear-gradient(90deg, #1E1133 0%, #261245 55%, #1E1133 100%)",
-  height: "72px", padding: "0 2.5rem",
+  height: "64px", padding: "0 2.5rem",
   display: "flex", alignItems: "center", justifyContent: "space-between",
   position: "sticky", top: 0, zIndex: 100,
   boxShadow: "0 8px 32px rgba(30,17,51,0.28)",
 };
 
 export default function Home() {
+  const [lang, setLang] = useState<Lang>("de");
+
+  useEffect(() => {
+    const saved = localStorage.getItem("lang") as Lang | null;
+    if (saved === "ru" || saved === "de") setLang(saved);
+  }, []);
+
+  function switchLang(l: Lang) {
+    setLang(l);
+    localStorage.setItem("lang", l);
+  }
+
+  const t = dictionaries[lang];
+
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "var(--sand)" }}>
 
       {/* NAV */}
       <nav style={NAV}>
-        <span style={{ fontFamily: "var(--font-sans)", fontWeight: 800, fontSize: "1.3rem", color: "#fff" }}>
+        <span style={{ fontFamily: "var(--font-sans)", fontWeight: 800, fontSize: "1.5rem", color: "#fff" }}>
           Behörden<span style={{ color: "var(--gold)" }}>Reply</span>
         </span>
         <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
-          <Link href="/login" className="btn-outline-white">Anmelden</Link>
-          <Link href="/login" className="btn-gold">STARTEN</Link>
+          <div style={{ display: "flex", gap: "0.4rem" }}>
+            {(["ru", "de"] as Lang[]).map((l) => (
+              <button key={l} type="button" onClick={() => switchLang(l)} style={{
+                padding: "0.3rem 0.8rem", borderRadius: "6px", fontSize: "0.8rem", fontWeight: 600,
+                border: "1.5px solid", cursor: "pointer",
+                background: lang === l ? "var(--gold)" : "transparent",
+                color: lang === l ? "#fff" : "rgba(255,255,255,0.6)",
+                borderColor: lang === l ? "var(--gold)" : "rgba(255,255,255,0.3)",
+              }}>{l.toUpperCase()}</button>
+            ))}
+          </div>
+          <Link href="/login" className="btn-gold">{t.navLogin}</Link>
         </div>
       </nav>
 
       {/* HERO */}
-      <section style={{ background: "linear-gradient(90deg, #FFF9F2 0%, #FAF6F0 42%, #F4E9DA 100%)", overflow: "hidden", display: "grid", gridTemplateColumns: "48fr 52fr", minHeight: "calc(100vh - 72px)" }}>
-          <div style={{ padding: "40px 16px 40px 42px", display: "flex", alignItems: "center" }}><div style={{ width: "100%" }}>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "var(--lavender)", border: "1px solid var(--violet-pale)", borderRadius: "6px", padding: "5px 14px", marginBottom: "14px" }}>
+      <section style={{ background: "linear-gradient(90deg, #FFF9F2 0%, #FAF6F0 42%, #F4E9DA 100%)", overflow: "hidden", display: "grid", gridTemplateColumns: "46fr 54fr", minHeight: "calc(100vh - 64px)" }}>
+          <div style={{ padding: "28px 16px 28px 48px", display: "flex", alignItems: "center" }}><div style={{ width: "100%" }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "var(--lavender)", border: "1px solid var(--violet-pale)", borderRadius: "6px", padding: "5px 14px", marginBottom: "12px" }}>
               <div style={{ width: "7px", height: "7px", background: "var(--violet-mid)", borderRadius: "50%" }} />
-              <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--violet)", letterSpacing: "0.1em", textTransform: "uppercase" }}>KI-Assistent für Behördenpost</span>
+              <span style={{ fontSize: "14px", fontWeight: 700, color: "var(--violet)", letterSpacing: "0.1em", textTransform: "uppercase" }}>{t.heroBadge}</span>
             </div>
-            <h1 style={{ fontFamily: "var(--font-serif)", fontSize: "clamp(2.2rem, 4vw, 3rem)", color: "var(--violet)", lineHeight: 1.1, marginBottom: "1rem" }}>
-              Ein Brief vom Amt. Kein Stress. Wir antworten für Sie.
+            <h1 style={{ fontFamily: "var(--font-serif)", fontSize: "clamp(2.4rem, 4.5vw, 3.4rem)", color: "var(--violet)", lineHeight: 1.08, marginBottom: "0.85rem" }}>
+              {t.heroTitle}
             </h1>
-            <p style={{ borderLeft: "3px solid var(--violet-pale)", paddingLeft: "16px", color: "#555", fontSize: "1rem", lineHeight: 1.6, marginBottom: "1.5rem" }}>
-              Wir lesen, analysieren und formulieren Ihre Antwort —<br />
-              präzise, fristgerecht und auf Deutsch.
+            <p style={{ borderLeft: "3px solid var(--violet-pale)", paddingLeft: "16px", color: "#555", fontSize: "1.35rem", lineHeight: 1.5, marginBottom: "1.25rem" }}>
+              {t.heroSubtitle}
             </p>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px", marginBottom: "1.75rem" }}>
-              {[["1","Brief hochladen"],["2","Angaben machen"],["3","Antwort herunterladen"]].map(([n,text]) => (
-                <div key={n} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 12px", background: "#F6F1FB", borderRadius: "10px", border: "1px solid rgba(123,94,167,0.15)", fontSize: "13px", color: "#333" }}>
-                  <div style={{ width: "24px", height: "24px", minWidth: "24px", background: "var(--violet)", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: 700, color: "#fff" }}>{n}</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px", marginBottom: "1.5rem" }}>
+              {[["1", t.heroStep1],["2", t.heroStep2],["3", t.heroStep3]].map(([n,text]) => (
+                <div key={n} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "12px 14px", background: "#F6F1FB", borderRadius: "10px", border: "1px solid rgba(123,94,167,0.15)", fontSize: "1rem", fontWeight: 500, color: "#333" }}>
+                  <div style={{ width: "30px", height: "30px", minWidth: "30px", background: "var(--violet)", borderRadius: "6px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "15px", fontWeight: 700, color: "#fff" }}>{n}</div>
                   {text}
                 </div>
               ))}
             </div>
-            <Link href="/login" className="btn-violet" style={{ fontSize: "1.05rem", marginBottom: "10px", display: "inline-flex" }}>
-              STARTEN
+            <Link href="/login" className="btn-violet" style={{ fontSize: "1.2rem", marginBottom: "10px", display: "inline-flex", padding: "0.85rem 2.4rem" }}>
+              {t.heroCta}
             </Link>
-            <p style={{ fontSize: "12px", color: "#999", marginBottom: "16px" }}>Erste Analyse kostenlos — keine Kreditkarte nötig</p>
+            <p style={{ fontSize: "1rem", color: "#999", marginBottom: "14px" }}>{t.heroFree}</p>
             <div style={{ display: "flex", gap: "1.25rem", flexWrap: "wrap" }}>
-              {["Keine versteckten Kosten","DSGVO-konform","Ergebnis in Minuten"].map(t => (
-                <span key={t} style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", color: "#555", fontWeight: 500 }}>
-                  <span style={{ color: "var(--violet-mid)", fontWeight: 700 }}>✓</span> {t}
+              {[t.heroTrust1, t.heroTrust2, t.heroTrust3].map(txt => (
+                <span key={txt} style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "1rem", color: "#555", fontWeight: 500 }}>
+                  <span style={{ color: "var(--violet-mid)", fontWeight: 700 }}>✓</span> {txt}
                 </span>
               ))}
             </div>
           </div></div>
 
           {/* Right — photo */}
-          <div style={{ position: "relative", overflow: "hidden", minHeight: "420px" }}>
+          <div style={{ position: "relative", overflow: "hidden" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/hero.png"
               alt="Deutsche Behördenbriefe auf dem Schreibtisch"
               style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "90% 20%", display: "block", filter: "brightness(0.87) saturate(0.78)", position: "absolute", inset: 0 }}
             />
-            {/* left fade overlay */}
             <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, #FAF6F0 0%, rgba(250,246,240,0.6) 22%, rgba(250,246,240,0.15) 38%, transparent 55%)", zIndex: 1, pointerEvents: "none" }} />
-            {/* warm tint */}
             <div style={{ position: "absolute", inset: 0, background: "rgba(248,238,218,0.12)", zIndex: 1, pointerEvents: "none" }} />
           </div>
       </section>
@@ -77,13 +101,13 @@ export default function Home() {
       {/* HOW IT WORKS */}
       <section style={{ padding: "4rem 2.5rem", background: "var(--sand)" }}>
         <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
-          <div className="section-label">Der Ablauf</div>
-          <h2 style={{ fontFamily: "var(--font-serif)", fontSize: "1.9rem", color: "var(--violet)", marginBottom: "2rem" }}>Ihr Weg zur fertigen Antwort</h2>
+          <div className="section-label">{t.sectionHowLabel}</div>
+          <h2 style={{ fontFamily: "var(--font-serif)", fontSize: "1.9rem", color: "var(--violet)", marginBottom: "2rem" }}>{t.sectionHowTitle}</h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "1.5rem" }}>
             {[
-              {n:"1",title:"Brief hochladen",text:"Laden Sie das Schreiben als PDF hoch — die KI erfasst den Inhalt vollautomatisch, auch bei eingescannten Dokumenten."},
-              {n:"2",title:"Angaben ergänzen",text:"Der Assistent stellt nur die nötigsten Rückfragen — gezielt, ohne Umwege, in wenigen Minuten erledigt."},
-              {n:"3",title:"Antwort herunterladen",text:"Das fertige Antwortschreiben steht sofort als PDF und DOCX bereit — zum Ausdrucken oder direkt versenden."},
+              {n:"1",title:t.howStep1Title,text:t.howStep1Text},
+              {n:"2",title:t.howStep2Title,text:t.howStep2Text},
+              {n:"3",title:t.howStep3Title,text:t.howStep3Text},
             ].map(s => (
               <div key={s.n} style={{ background: "#fff", borderRadius: "14px", padding: "1.75rem", border: "1px solid var(--border)", boxShadow: "0 2px 12px rgba(76,29,149,0.06)" }}>
                 <div style={{ width: "2.5rem", height: "2.5rem", background: "linear-gradient(135deg,#4C1D95,#6B46C1)", color: "#fff", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "1rem", marginBottom: "1rem", boxShadow: "0 4px 12px rgba(76,29,149,0.25)" }}>{s.n}</div>
@@ -98,16 +122,16 @@ export default function Home() {
       {/* PRICING */}
       <section style={{ padding: "4rem 2.5rem", background: "#fff" }}>
         <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
-          <div className="section-label">Tarife</div>
-          <h2 style={{ fontFamily: "var(--font-serif)", fontSize: "1.9rem", color: "var(--violet)", marginBottom: "2rem" }}>Fair berechnet. Ohne Kleingedrucktes.</h2>
+          <div className="section-label">{t.sectionPricingLabel}</div>
+          <h2 style={{ fontFamily: "var(--font-serif)", fontSize: "1.9rem", color: "var(--violet)", marginBottom: "2rem" }}>{t.sectionPricingTitle}</h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "1.5rem", alignItems: "start" }}>
             {[
-              {label:"Kostenlos",price:"0 €",desc:"Zum Kennenlernen — einmalig",features:["KI-Analyse Ihres Schreibens","Fertig formuliertes Antwortschreiben","Einmalige Registrierung erforderlich"],hot:false},
-              {label:"Einzelabruf",price:"3,99 €",desc:"Zahlen Sie nur, was Sie nutzen",features:["KI-Analyse & gezielte Rückfragen","Fertig formuliertes Antwortschreiben","Download als PDF und DOCX"],hot:true},
-              {label:"Monatlich",price:"9,99 €",desc:"Bis zu 30 Schreiben pro Monat",features:["Bis zu 30 Dokumente monatlich","Fertig formuliertes Antwortschreiben","Download als PDF und DOCX"],hot:false},
+              {label:t.priceFreeLabel,price:t.priceFreePrice,desc:t.priceFreeDesc,features:[t.priceFreeFeat1,t.priceFreeFeat2,t.priceFreeFeat3],hot:false,badge:""},
+              {label:t.priceSingleLabel,price:t.priceSinglePrice,desc:t.priceSingleDesc,features:[t.priceSingleFeat1,t.priceSingleFeat2,t.priceSingleFeat3],hot:true,badge:t.priceSingleBadge},
+              {label:t.priceSubLabel,price:t.priceSubPrice,desc:t.priceSubDesc,features:[t.priceSubFeat1,t.priceSubFeat2,t.priceSubFeat3],hot:false,badge:""},
             ].map(p => (
               <div key={p.label} style={{ background: p.hot ? "linear-gradient(135deg,#4C1D95,#3D2578)" : "#fff", color: p.hot ? "#fff" : "var(--fg)", borderRadius: "16px", padding: "2rem", border: p.hot ? "none" : "1px solid var(--border)", boxShadow: p.hot ? "0 12px 40px rgba(76,29,149,0.28)" : "0 2px 12px rgba(0,0,0,0.05)", position: "relative" }}>
-                {p.hot && <div style={{ position: "absolute", top: "-12px", left: "50%", transform: "translateX(-50%)", background: "var(--gold)", color: "#fff", borderRadius: "100px", padding: "0.2rem 1rem", fontSize: "0.75rem", fontWeight: 700, whiteSpace: "nowrap" }}>Beliebt</div>}
+                {p.hot && <div style={{ position: "absolute", top: "-12px", left: "50%", transform: "translateX(-50%)", background: "var(--gold)", color: "#fff", borderRadius: "100px", padding: "0.2rem 1rem", fontSize: "0.75rem", fontWeight: 700, whiteSpace: "nowrap" }}>{p.badge}</div>}
                 <div style={{ fontWeight: 700, fontSize: "0.8rem", opacity: 0.65, marginBottom: "0.25rem", textTransform: "uppercase", letterSpacing: "0.08em" }}>{p.label}</div>
                 <div style={{ fontSize: "2.2rem", fontWeight: 800, marginBottom: "0.2rem", fontFamily: "var(--font-serif)" }}>{p.price}</div>
                 <div style={{ fontSize: "0.85rem", opacity: 0.6, marginBottom: "1.25rem" }}>{p.desc}</div>
@@ -128,13 +152,13 @@ export default function Home() {
       <section style={{ background: "linear-gradient(135deg,#1E1133 0%,#261245 100%)", padding: "5rem 2.5rem", textAlign: "center" }}>
         <div style={{ maxWidth: "620px", margin: "0 auto" }}>
           <h2 style={{ fontFamily: "var(--font-serif)", color: "#fff", fontSize: "2.1rem", lineHeight: 1.2, marginBottom: "1rem" }}>
-            Kein Brief ohne Antwort.<br />Wir sind dabei.
+            {t.ctaTitle.split("\n").map((line, i) => <React.Fragment key={i}>{i > 0 && <br />}{line}</React.Fragment>)}
           </h2>
           <p style={{ color: "rgba(255,255,255,0.6)", marginBottom: "2rem", lineHeight: 1.7 }}>
-            Laden Sie Ihr Schreiben hoch — in wenigen Minuten haben Sie eine vollständige, korrekte Antwort in der Hand.
+            {t.ctaText}
           </p>
           <Link href="/login" className="btn-gold" style={{ fontSize: "1.05rem", padding: "0.9rem 2.4rem" }}>
-            STARTEN
+            {t.ctaButton}
           </Link>
         </div>
       </section>
@@ -143,8 +167,8 @@ export default function Home() {
       <footer style={{ background: "#150D30", padding: "1.75rem 2.5rem", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem" }}>
         <span style={{ fontWeight: 800, color: "#fff", fontSize: "1.1rem" }}>Behörden<span style={{ color: "var(--gold)" }}>Reply</span></span>
         <div style={{ display: "flex", gap: "1.5rem" }}>
-          {["Impressum","Datenschutz","AGB"].map(l => (
-            <Link key={l} href="/" style={{ color: "rgba(255,255,255,0.45)", textDecoration: "none", fontSize: "0.85rem" }}>{l}</Link>
+          {[{label:"Impressum",href:"/impressum"},{label:"Datenschutz",href:"/datenschutz"},{label:"AGB",href:"/agb"}].map(l => (
+            <Link key={l.label} href={l.href} style={{ color: "rgba(255,255,255,0.45)", textDecoration: "none", fontSize: "0.85rem" }}>{l.label}</Link>
           ))}
         </div>
         <span style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.3)" }}>© 2026 BehördenReply</span>
