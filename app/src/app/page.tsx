@@ -58,7 +58,7 @@ export default function Home() {
               <div style={{ width: "7px", height: "7px", background: "var(--violet-mid)", borderRadius: "50%" }} />
               <span style={{ fontSize: "15px", fontWeight: 700, color: "var(--violet)", letterSpacing: "0.1em", textTransform: "uppercase" }}>{t.heroBadge}</span>
             </div>
-            <h1 style={{ fontFamily: "var(--font-serif)", fontSize: "clamp(2.4rem, 4.5vw, 3.4rem)", color: "var(--violet)", lineHeight: 1.15, marginBottom: "0.85rem", textAlign: "center" }}>
+            <h1 style={{ fontFamily: "var(--font-sans)", fontSize: "clamp(2.4rem, 4.5vw, 3.4rem)", color: "var(--violet)", lineHeight: 1.15, marginBottom: "0.85rem", textAlign: "center" }}>
               {t.heroTitle.split("\n").map((line, i) => <React.Fragment key={i}>{i > 0 && <br />}{line}</React.Fragment>)}
             </h1>
             <p style={{ color: "#555", fontSize: "1.35rem", lineHeight: 1.5, marginBottom: "1.25rem", textAlign: "center" }}>
@@ -116,7 +116,7 @@ export default function Home() {
           <div style={{ padding: "3.5rem 48px 3.5rem 32px", display: "flex", alignItems: "center" }}>
             <div style={{ width: "100%" }}>
               <div className="section-label">{t.sectionHowLabel}</div>
-              <h2 style={{ fontFamily: "var(--font-serif)", fontSize: "2.2rem", color: "var(--violet)", marginBottom: "2rem" }}>{t.sectionHowTitle}</h2>
+              <h2 style={{ fontFamily: "var(--font-sans)", fontSize: "2.2rem", color: "var(--violet)", marginBottom: "2rem" }}>{t.sectionHowTitle}</h2>
               <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
                 {[
                   {n:"1",title:t.howStep1Title,text:t.howStep1Text},
@@ -140,7 +140,7 @@ export default function Home() {
       <section style={{ padding: "4rem 2.5rem", background: "#fff" }}>
         <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
           <div className="section-label">{t.sectionPricingLabel}</div>
-          <h2 style={{ fontFamily: "var(--font-serif)", fontSize: "2.2rem", color: "var(--violet)", marginBottom: "2rem" }}>{t.sectionPricingTitle}</h2>
+          <h2 style={{ fontFamily: "var(--font-sans)", fontSize: "2.2rem", color: "var(--violet)", marginBottom: "2rem" }}>{t.sectionPricingTitle}</h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "1.5rem", alignItems: "start" }}>
             {[
               {label:t.priceFreeLabel,price:t.priceFreePrice,desc:t.priceFreeDesc,features:[t.priceFreeFeat1,t.priceFreeFeat2,t.priceFreeFeat3],hot:false,badge:""},
@@ -150,7 +150,7 @@ export default function Home() {
               <div key={p.label} style={{ background: p.hot ? "linear-gradient(135deg,#4C1D95,#3D2578)" : "#fff", color: p.hot ? "#fff" : "var(--fg)", borderRadius: "16px", padding: "2rem", border: p.hot ? "none" : "1px solid var(--border)", boxShadow: p.hot ? "0 12px 40px rgba(76,29,149,0.28)" : "0 2px 12px rgba(0,0,0,0.05)", position: "relative" }}>
                 {p.hot && <div style={{ position: "absolute", top: "-12px", left: "50%", transform: "translateX(-50%)", background: "var(--gold)", color: "#fff", borderRadius: "100px", padding: "0.2rem 1rem", fontSize: "0.85rem", fontWeight: 700, whiteSpace: "nowrap" }}>{p.badge}</div>}
                 <div style={{ fontWeight: 700, fontSize: "0.9rem", opacity: 0.65, marginBottom: "0.25rem", textTransform: "uppercase", letterSpacing: "0.08em" }}>{p.label}</div>
-                <div style={{ fontSize: "2.5rem", fontWeight: 800, marginBottom: "0.2rem", fontFamily: "var(--font-serif)" }}>{p.price}</div>
+                <div style={{ fontSize: "2.5rem", fontWeight: 800, marginBottom: "0.2rem", fontFamily: "var(--font-sans)" }}>{p.price}</div>
                 <div style={{ fontSize: "1rem", opacity: 0.6, marginBottom: "1.25rem" }}>{p.desc}</div>
                 <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "0.55rem" }}>
                   {p.features.map(f => (
@@ -168,7 +168,7 @@ export default function Home() {
       {/* CTA */}
       <section style={{ background: "linear-gradient(135deg,#1E1133 0%,#261245 100%)", padding: "5rem 2.5rem", textAlign: "center" }}>
         <div style={{ maxWidth: "620px", margin: "0 auto" }}>
-          <h2 style={{ fontFamily: "var(--font-serif)", color: "#fff", fontSize: "2.4rem", lineHeight: 1.2, marginBottom: "1rem" }}>
+          <h2 style={{ fontFamily: "var(--font-sans)", color: "#fff", fontSize: "2.4rem", lineHeight: 1.2, marginBottom: "1rem" }}>
             {t.ctaTitle.split("\n").map((line, i) => <React.Fragment key={i}>{i > 0 && <br />}{line}</React.Fragment>)}
           </h2>
           <p style={{ color: "rgba(255,255,255,0.6)", marginBottom: "2rem", lineHeight: 1.7, fontSize: "1.15rem" }}>
