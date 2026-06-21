@@ -99,24 +99,41 @@ export default function Home() {
       </section>
 
       {/* HOW IT WORKS */}
-      <section style={{ padding: "4rem 2.5rem", background: "var(--sand)" }}>
-        <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
-          <div className="section-label">{t.sectionHowLabel}</div>
-          <h2 style={{ fontFamily: "var(--font-serif)", fontSize: "2.2rem", color: "var(--violet)", marginBottom: "2rem" }}>{t.sectionHowTitle}</h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "1.5rem" }}>
-            {[
-              {n:"1",title:t.howStep1Title,text:t.howStep1Text},
-              {n:"2",title:t.howStep2Title,text:t.howStep2Text},
-              {n:"3",title:t.howStep3Title,text:t.howStep3Text},
-            ].map(s => (
-              <div key={s.n} style={{ background: "#fff", borderRadius: "14px", padding: "1.75rem", border: "1px solid var(--border)", boxShadow: "0 2px 12px rgba(76,29,149,0.06)" }}>
-                <div style={{ width: "2.5rem", height: "2.5rem", background: "linear-gradient(135deg,#4C1D95,#6B46C1)", color: "#fff", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "1rem", marginBottom: "1rem", boxShadow: "0 4px 12px rgba(76,29,149,0.25)" }}>{s.n}</div>
-                <div style={{ fontWeight: 700, fontSize: "1.1rem", marginBottom: "0.5rem", color: "var(--plum)" }}>{s.title}</div>
-                <div style={{ color: "var(--fg-muted)", fontSize: "1rem", lineHeight: 1.65 }}>{s.text}</div>
-              </div>
-            ))}
+      <section style={{ background: "var(--sand)", overflow: "hidden", display: "grid", gridTemplateColumns: "46fr 54fr", minHeight: "520px" }}>
+          {/* Left — photo */}
+          <div style={{ position: "relative", overflow: "hidden" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/ablauf.png"
+              alt="Behördenbriefe und Notizen auf dem Schreibtisch"
+              style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center center", display: "block", filter: "brightness(0.88) saturate(0.8)", position: "absolute", inset: 0 }}
+            />
+            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to left, var(--sand) 0%, rgba(245,240,232,0.6) 22%, rgba(245,240,232,0.15) 38%, transparent 55%)", zIndex: 1, pointerEvents: "none" }} />
+            <div style={{ position: "absolute", inset: 0, background: "rgba(248,238,218,0.12)", zIndex: 1, pointerEvents: "none" }} />
           </div>
-        </div>
+
+          {/* Right — content */}
+          <div style={{ padding: "3.5rem 48px 3.5rem 32px", display: "flex", alignItems: "center" }}>
+            <div style={{ width: "100%" }}>
+              <div className="section-label">{t.sectionHowLabel}</div>
+              <h2 style={{ fontFamily: "var(--font-serif)", fontSize: "2.2rem", color: "var(--violet)", marginBottom: "2rem" }}>{t.sectionHowTitle}</h2>
+              <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+                {[
+                  {n:"1",title:t.howStep1Title,text:t.howStep1Text},
+                  {n:"2",title:t.howStep2Title,text:t.howStep2Text},
+                  {n:"3",title:t.howStep3Title,text:t.howStep3Text},
+                ].map(s => (
+                  <div key={s.n} style={{ background: "#fff", borderRadius: "14px", padding: "1.5rem 1.75rem", border: "1px solid var(--border)", boxShadow: "0 2px 12px rgba(76,29,149,0.06)", display: "flex", gap: "1.25rem", alignItems: "flex-start" }}>
+                    <div style={{ width: "2.5rem", height: "2.5rem", minWidth: "2.5rem", background: "linear-gradient(135deg,#4C1D95,#6B46C1)", color: "#fff", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "1rem", boxShadow: "0 4px 12px rgba(76,29,149,0.25)" }}>{s.n}</div>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: "1.1rem", marginBottom: "0.3rem", color: "var(--plum)" }}>{s.title}</div>
+                      <div style={{ color: "var(--fg-muted)", fontSize: "1rem", lineHeight: 1.65 }}>{s.text}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
       </section>
 
       {/* PRICING */}
