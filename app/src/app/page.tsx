@@ -53,15 +53,15 @@ export default function Home() {
 
       {/* HERO */}
       <section style={{ background: "linear-gradient(90deg, #FFF9F2 0%, #FAF6F0 42%, #F4E9DA 100%)", overflow: "hidden", display: "grid", gridTemplateColumns: "46fr 54fr", minHeight: "calc(100vh - 64px)" }}>
-          <div style={{ padding: "28px 16px 28px 48px", display: "flex", alignItems: "center" }}><div style={{ width: "100%" }}>
+          <div style={{ padding: "28px 16px 28px 48px", display: "flex", alignItems: "center" }}><div style={{ width: "100%", textAlign: "center" }}>
             <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "var(--lavender)", border: "1px solid var(--violet-pale)", borderRadius: "6px", padding: "5px 14px", marginBottom: "12px" }}>
               <div style={{ width: "7px", height: "7px", background: "var(--violet-mid)", borderRadius: "50%" }} />
               <span style={{ fontSize: "15px", fontWeight: 700, color: "var(--violet)", letterSpacing: "0.1em", textTransform: "uppercase" }}>{t.heroBadge}</span>
             </div>
-            <h1 style={{ fontFamily: "var(--font-serif)", fontSize: "clamp(2.4rem, 4.5vw, 3.4rem)", color: "var(--violet)", lineHeight: 1.08, marginBottom: "0.85rem" }}>
-              {t.heroTitle}
+            <h1 style={{ fontFamily: "var(--font-serif)", fontSize: "clamp(2.4rem, 4.5vw, 3.4rem)", color: "var(--violet)", lineHeight: 1.15, marginBottom: "0.85rem", textAlign: "center" }}>
+              {t.heroTitle.split("\n").map((line, i) => <React.Fragment key={i}>{i > 0 && <br />}{line}</React.Fragment>)}
             </h1>
-            <p style={{ borderLeft: "3px solid var(--violet-pale)", paddingLeft: "16px", color: "#555", fontSize: "1.35rem", lineHeight: 1.5, marginBottom: "1.25rem" }}>
+            <p style={{ color: "#555", fontSize: "1.35rem", lineHeight: 1.5, marginBottom: "1.25rem", textAlign: "center" }}>
               {t.heroSubtitle}
             </p>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px", marginBottom: "1.5rem" }}>
@@ -76,7 +76,7 @@ export default function Home() {
               {t.heroCta}
             </Link>
             <p style={{ fontSize: "1.1rem", color: "#999", marginBottom: "14px" }}>{t.heroFree}</p>
-            <div style={{ display: "flex", gap: "1.25rem", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", gap: "1.25rem", flexWrap: "wrap", justifyContent: "center" }}>
               {[t.heroTrust1, t.heroTrust2, t.heroTrust3].map(txt => (
                 <span key={txt} style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "1.1rem", color: "#555", fontWeight: 500 }}>
                   <span style={{ color: "var(--violet-mid)", fontWeight: 700 }}>✓</span> {txt}

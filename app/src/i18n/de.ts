@@ -76,7 +76,7 @@ export const de = {
   navBack: "Zurück",
   navLogout: "Abmelden",
   heroBadge: "KI-Assistent für Behördenpost",
-  heroTitle: "Ein Brief vom Amt. Kein Stress. Wir antworten für Sie.",
+  heroTitle: "Ein Brief von einer Behörde?\nKeine Sorge!\nWir kümmern uns darum.",
   heroSubtitle: "Wir lesen, analysieren und formulieren Ihre Antwort — präzise, fristgerecht und auf Deutsch.",
   heroStep1: "Brief hochladen",
   heroStep2: "Angaben machen",
